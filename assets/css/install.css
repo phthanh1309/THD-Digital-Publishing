@@ -1,0 +1,2555 @@
+/* ==========================================================================
+   THD DIGITAL PUBLISHING — INSTALLER
+   File: assets/css/install.css
+   --------------------------------------------------------------------------
+   Stylesheet cho install.php — Trình cài đặt hệ thống.
+
+   Mục lục:
+     01. Design tokens — Biến toàn cục
+     02. Reset & normalize
+     03. Base — html, body
+     04. Typography
+     05. Accessibility
+     06. Layout — main container
+     07. Installer header
+     08. Section chung
+     09. Error section
+     10. Warning section
+     11. Environment check (dl)
+     12. Admin form section
+     13. Form fields — input, label, help text
+     14. Form validation states
+     15. Buttons
+     16. Success section
+     17. Ordered list (bước tiếp theo)
+     18. Code & inline elements
+     19. Utilities
+     20. Responsive
+     21. Dark mode
+     22. Reduced motion
+     23. High contrast
+     24. Forced colors
+     25. Print
+     26. Scrollbar
+     27. Animations
+     28. Final overrides
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. DESIGN TOKENS — BIẾN TOÀN CỤC
+   ========================================================================== */
+
+:root {
+
+    /* ---------------------------------------------------------------------
+       1.1. Brand palette
+       --------------------------------------------------------------------- */
+    --color-brand-50:  #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    /* ---------------------------------------------------------------------
+       1.2. Accent palette (vàng đồng — học thuật)
+       --------------------------------------------------------------------- */
+    --color-accent-50:  #fffbeb;
+    --color-accent-100: #fef3c7;
+    --color-accent-200: #fde68a;
+    --color-accent-300: #fcd34d;
+    --color-accent-400: #fbbf24;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+    --color-accent-700: #b45309;
+    --color-accent-800: #92400e;
+    --color-accent-900: #78350f;
+
+    /* ---------------------------------------------------------------------
+       1.3. Neutral scale
+       --------------------------------------------------------------------- */
+    --color-neutral-0:   #ffffff;
+    --color-neutral-50:  #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+    --color-neutral-950: #020617;
+
+    /* ---------------------------------------------------------------------
+       1.4. Semantic colors
+       --------------------------------------------------------------------- */
+    --color-success-50:  #f0fdf4;
+    --color-success-100: #dcfce7;
+    --color-success-200: #bbf7d0;
+    --color-success-300: #86efac;
+    --color-success-400: #4ade80;
+    --color-success-500: #22c55e;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+    --color-success-800: #166534;
+    --color-success-900: #14532d;
+
+    --color-warning-50:  #fffbeb;
+    --color-warning-100: #fef3c7;
+    --color-warning-200: #fde68a;
+    --color-warning-300: #fcd34d;
+    --color-warning-400: #fbbf24;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-700: #b45309;
+    --color-warning-800: #92400e;
+    --color-warning-900: #78350f;
+
+    --color-danger-50:  #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-200: #fecaca;
+    --color-danger-300: #fca5a5;
+    --color-danger-400: #f87171;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+    --color-danger-800: #991b1b;
+    --color-danger-900: #7f1d1d;
+
+    --color-info-50:  #eff6ff;
+    --color-info-100: #dbeafe;
+    --color-info-200: #bfdbfe;
+    --color-info-300: #93c5fd;
+    --color-info-400: #60a5fa;
+    --color-info-500: #3b82f6;
+    --color-info-600: #2563eb;
+    --color-info-700: #1d4ed8;
+    --color-info-800: #1e40af;
+    --color-info-900: #1e3a8a;
+
+    /* ---------------------------------------------------------------------
+       1.5. Semantic surface & text
+       --------------------------------------------------------------------- */
+    --color-bg:              var(--color-neutral-50);
+    --color-bg-elevated:     var(--color-neutral-0);
+    --color-bg-subtle:       var(--color-neutral-100);
+    --color-bg-inverse:      var(--color-neutral-900);
+    --color-bg-code:         var(--color-neutral-100);
+
+    --color-text:            var(--color-neutral-900);
+    --color-text-muted:      var(--color-neutral-600);
+    --color-text-subtle:     var(--color-neutral-500);
+    --color-text-inverse:    var(--color-neutral-50);
+    --color-text-brand:      var(--color-brand-700);
+    --color-text-danger:     var(--color-danger-700);
+    --color-text-success:    var(--color-success-700);
+    --color-text-warning:    var(--color-warning-800);
+
+    --color-border:          var(--color-neutral-200);
+    --color-border-strong:   var(--color-neutral-300);
+    --color-border-subtle:   var(--color-neutral-100);
+
+    --color-ring:            var(--color-brand-500);
+    --color-ring-danger:     var(--color-danger-500);
+    --color-ring-success:    var(--color-success-500);
+
+    /* ---------------------------------------------------------------------
+       1.6. Typography
+       --------------------------------------------------------------------- */
+    --font-sans:
+        "Be Vietnam Pro",
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        "Noto Sans",
+        sans-serif,
+        "Apple Color Emoji",
+        "Segoe UI Emoji";
+
+    --font-serif:
+        "Noto Serif",
+        "Source Serif 4",
+        Georgia,
+        "Times New Roman",
+        serif;
+
+    --font-mono:
+        "JetBrains Mono",
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        Menlo,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    --font-size-2xs: 0.6875rem;
+    --font-size-xs:  0.75rem;
+    --font-size-sm:  0.875rem;
+    --font-size-md:  1rem;
+    --font-size-lg:  1.125rem;
+    --font-size-xl:  1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+    --font-size-5xl: 3rem;
+    --font-size-6xl: 3.75rem;
+
+    --font-weight-light:     300;
+    --font-weight-regular:   400;
+    --font-weight-medium:    500;
+    --font-weight-semibold:  600;
+    --font-weight-bold:      700;
+    --font-weight-extrabold: 800;
+    --font-weight-black:     900;
+
+    --line-height-none:    1;
+    --line-height-tight:   1.15;
+    --line-height-snug:    1.3;
+    --line-height-normal:  1.5;
+    --line-height-relaxed: 1.65;
+    --line-height-loose:   1.85;
+
+    --letter-spacing-tighter: -0.04em;
+    --letter-spacing-tight:   -0.02em;
+    --letter-spacing-normal:  0;
+    --letter-spacing-wide:    0.02em;
+    --letter-spacing-wider:   0.05em;
+    --letter-spacing-widest:  0.12em;
+
+    /* ---------------------------------------------------------------------
+       1.7. Spacing scale (bước 4px)
+       --------------------------------------------------------------------- */
+    --space-0:   0;
+    --space-px:  1px;
+    --space-0-5: 0.125rem;
+    --space-1:   0.25rem;
+    --space-1-5: 0.375rem;
+    --space-2:   0.5rem;
+    --space-2-5: 0.625rem;
+    --space-3:   0.75rem;
+    --space-3-5: 0.875rem;
+    --space-4:   1rem;
+    --space-5:   1.25rem;
+    --space-6:   1.5rem;
+    --space-7:   1.75rem;
+    --space-8:   2rem;
+    --space-9:   2.25rem;
+    --space-10:  2.5rem;
+    --space-11:  2.75rem;
+    --space-12:  3rem;
+    --space-14:  3.5rem;
+    --space-16:  4rem;
+    --space-18:  4.5rem;
+    --space-20:  5rem;
+    --space-24:  6rem;
+    --space-28:  7rem;
+    --space-32:  8rem;
+
+    /* ---------------------------------------------------------------------
+       1.8. Border radius
+       --------------------------------------------------------------------- */
+    --radius-none: 0;
+    --radius-xs:   0.125rem;
+    --radius-sm:   0.25rem;
+    --radius-md:   0.375rem;
+    --radius-lg:   0.5rem;
+    --radius-xl:   0.75rem;
+    --radius-2xl:  1rem;
+    --radius-3xl:  1.5rem;
+    --radius-4xl:  2rem;
+    --radius-full: 9999px;
+
+    /* ---------------------------------------------------------------------
+       1.9. Shadows
+       --------------------------------------------------------------------- */
+    --shadow-xs:
+        0 1px 2px 0 rgb(15 23 42 / 0.04);
+
+    --shadow-sm:
+        0 1px 3px 0 rgb(15 23 42 / 0.08),
+        0 1px 2px -1px rgb(15 23 42 / 0.06);
+
+    --shadow-md:
+        0 4px 6px -1px rgb(15 23 42 / 0.08),
+        0 2px 4px -2px rgb(15 23 42 / 0.06);
+
+    --shadow-lg:
+        0 10px 15px -3px rgb(15 23 42 / 0.08),
+        0 4px 6px -4px rgb(15 23 42 / 0.05);
+
+    --shadow-xl:
+        0 20px 25px -5px rgb(15 23 42 / 0.10),
+        0 8px 10px -6px rgb(15 23 42 / 0.06);
+
+    --shadow-2xl:
+        0 25px 50px -12px rgb(15 23 42 / 0.22);
+
+    --shadow-inner:
+        inset 0 2px 4px 0 rgb(15 23 42 / 0.05);
+
+    --shadow-brand:
+        0 10px 24px -8px rgb(79 70 229 / 0.45);
+
+    --shadow-brand-lg:
+        0 18px 40px -12px rgb(79 70 229 / 0.50);
+
+    --shadow-danger:
+        0 10px 24px -8px rgb(220 38 38 / 0.35);
+
+    --shadow-success:
+        0 10px 24px -8px rgb(22 163 74 / 0.35);
+
+    /* ---------------------------------------------------------------------
+       1.10. Motion
+       --------------------------------------------------------------------- */
+    --ease-linear: linear;
+    --ease-in:     cubic-bezier(0.4, 0, 1, 1);
+    --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --duration-75:   75ms;
+    --duration-100:  100ms;
+    --duration-150:  150ms;
+    --duration-200:  200ms;
+    --duration-300:  300ms;
+    --duration-500:  500ms;
+    --duration-700:  700ms;
+    --duration-1000: 1000ms;
+
+    --transition-fast: var(--duration-150) var(--ease-out);
+    --transition-base: var(--duration-200) var(--ease-out);
+    --transition-slow: var(--duration-300) var(--ease-out);
+
+    /* ---------------------------------------------------------------------
+       1.11. Layout
+       --------------------------------------------------------------------- */
+    --container-max:     880px;
+    --container-wide:    1100px;
+    --container-narrow:  640px;
+    --container-padding: var(--space-4);
+
+    --z-base:     1;
+    --z-dropdown: 100;
+    --z-sticky:   200;
+    --z-overlay:  300;
+    --z-modal:    400;
+    --z-toast:    500;
+
+    /* ---------------------------------------------------------------------
+       1.12. Focus ring
+       --------------------------------------------------------------------- */
+    --focus-ring-width:  2px;
+    --focus-ring-offset: 3px;
+    --focus-ring-color:  var(--color-brand-500);
+}
+
+
+@media (min-width: 640px) {
+    :root { --container-padding: var(--space-6); }
+}
+
+@media (min-width: 1024px) {
+    :root { --container-padding: var(--space-8); }
+}
+
+
+/* ==========================================================================
+   02. RESET & NORMALIZE
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    tab-size: 4;
+    height: 100%;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+img {
+    border-style: none;
+    font-style: italic;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    margin: 0;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-8) 0;
+}
+
+blockquote,
+figure {
+    margin: 0;
+}
+
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+legend {
+    padding: 0;
+}
+
+summary {
+    cursor: pointer;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2.1. Selection
+   -------------------------------------------------------------------------- */
+
+::selection {
+    background-color: var(--color-brand-200);
+    color: var(--color-brand-950);
+}
+
+
+/* ==========================================================================
+   03. BASE — HTML, BODY
+   ========================================================================== */
+
+html {
+    font-size: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-relaxed);
+    letter-spacing: var(--letter-spacing-normal);
+
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    overflow-x: hidden;
+    position: relative;
+
+    padding: var(--space-6) 0;
+}
+
+@media (min-width: 640px) {
+    body {
+        padding: var(--space-10) 0;
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        padding: var(--space-14) 0;
+    }
+}
+
+/* Nền trang nhẹ nhàng phía sau */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            1200px 600px at 80% -10%,
+            rgb(99 102 241 / 0.07),
+            transparent 60%
+        ),
+        radial-gradient(
+            900px 500px at 0% 0%,
+            rgb(245 158 11 / 0.05),
+            transparent 55%
+        );
+}
+
+main {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--container-padding);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+
+    flex: 1 0 auto;
+}
+
+@media (min-width: 640px) {
+    main {
+        gap: var(--space-8);
+    }
+}
+
+
+/* ==========================================================================
+   04. TYPOGRAPHY
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+h1 {
+    font-size: clamp(1.75rem, 1.4rem + 1.6vw, var(--font-size-3xl));
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-tighter);
+}
+
+h2 {
+    font-size: clamp(1.25rem, 1.1rem + 0.8vw, var(--font-size-xl));
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-tight);
+}
+
+h3 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+}
+
+h4 {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+}
+
+h5 {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+h6 {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wider);
+}
+
+p {
+    line-height: var(--line-height-relaxed);
+    text-wrap: pretty;
+}
+
+p + p {
+    margin-top: var(--space-3);
+}
+
+strong,
+b {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+small {
+    font-size: var(--font-size-sm);
+}
+
+sub,
+sup {
+    font-size: 0.75em;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+sup { top: -0.5em; }
+sub { bottom: -0.25em; }
+
+abbr[title] {
+    text-decoration: underline dotted;
+    cursor: help;
+}
+
+mark {
+    background-color: var(--color-accent-200);
+    color: var(--color-accent-900);
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-xs);
+}
+
+/* --------------------------------------------------------------------------
+   4.1. Links
+   -------------------------------------------------------------------------- */
+
+a {
+    color: var(--color-brand-700);
+    text-decoration: none;
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        opacity var(--transition-fast);
+    border-radius: var(--radius-xs);
+}
+
+a:hover {
+    color: var(--color-brand-800);
+}
+
+a:active {
+    color: var(--color-brand-900);
+}
+
+a:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+main p a,
+main li a {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+    text-decoration-color: rgb(79 70 229 / 0.35);
+}
+
+main p a:hover,
+main li a:hover {
+    text-decoration-color: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   4.2. Code
+   -------------------------------------------------------------------------- */
+
+code,
+kbd,
+samp,
+pre {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+}
+
+code {
+    padding: 0.125em 0.4em;
+
+    font-size: 0.875em;
+    font-weight: var(--font-weight-medium);
+
+    color: var(--color-brand-700);
+    background-color: var(--color-bg-code);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    white-space: nowrap;
+}
+
+pre {
+    padding: var(--space-4);
+
+    background-color: var(--color-neutral-900);
+    color: var(--color-neutral-50);
+
+    border-radius: var(--radius-lg);
+
+    overflow-x: auto;
+}
+
+pre code {
+    padding: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+}
+
+
+/* ==========================================================================
+   05. ACCESSIBILITY
+   ========================================================================== */
+
+.visually-hidden,
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+    position: static !important;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: normal;
+}
+
+.skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: var(--z-toast);
+
+    padding: var(--space-3) var(--space-5);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-700);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+
+    transform: translateY(-150%);
+    transition: transform var(--transition-base);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+    color: var(--color-neutral-0);
+}
+
+
+/* ==========================================================================
+   06. LAYOUT — MAIN CONTAINER
+   ========================================================================== */
+
+main > section,
+main > header,
+main > footer {
+    width: 100%;
+
+    padding: var(--space-6);
+
+    background-color: var(--color-bg-elevated);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2xl);
+
+    box-shadow: var(--shadow-xs);
+}
+
+@media (min-width: 640px) {
+    main > section,
+    main > header,
+    main > footer {
+        padding: var(--space-8);
+    }
+}
+
+@media (min-width: 1024px) {
+    main > section,
+    main > header,
+    main > footer {
+        padding: var(--space-10);
+    }
+}
+
+/* Section nội bộ */
+
+main > section > section + section,
+main > section > header + section {
+    margin-top: var(--space-8);
+    padding-top: var(--space-8);
+    border-top: 1px solid var(--color-border);
+}
+
+main > section > h2:first-child,
+main > section > header:first-child h2:first-child {
+    margin-top: 0;
+}
+
+main > section > h2 + * {
+    margin-top: var(--space-4);
+}
+
+
+/* ==========================================================================
+   07. INSTALLER HEADER
+   ========================================================================== */
+
+main > header {
+    text-align: center;
+
+    background:
+        linear-gradient(
+            150deg,
+            var(--color-brand-800) 0%,
+            var(--color-brand-700) 45%,
+            var(--color-brand-900) 100%
+        );
+
+    color: var(--color-text-inverse);
+
+    border: none;
+    box-shadow: var(--shadow-lg);
+
+    position: relative;
+    overflow: hidden;
+}
+
+main > header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+
+    background:
+        radial-gradient(
+            circle at 15% 25%,
+            rgb(255 255 255 / 0.14) 0,
+            transparent 42%
+        ),
+        radial-gradient(
+            circle at 85% 80%,
+            rgb(251 191 36 / 0.18) 0,
+            transparent 48%
+        );
+}
+
+main > header > * {
+    position: relative;
+    z-index: 1;
+}
+
+main > header p:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin: 0 0 var(--space-3);
+
+    padding: var(--space-1-5) var(--space-4);
+
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-widest);
+    text-transform: uppercase;
+
+    color: var(--color-accent-200);
+
+    background-color: rgb(255 255 255 / 0.10);
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: var(--radius-full);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+main > header p:first-child::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+
+    border-radius: var(--radius-full);
+    background-color: var(--color-accent-400);
+    box-shadow: 0 0 0 3px rgb(251 191 36 / 0.25);
+
+    flex: 0 0 auto;
+}
+
+main > header h1 {
+    margin: 0 0 var(--space-3);
+
+    font-size: clamp(1.75rem, 1.4rem + 2vw, var(--font-size-4xl));
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tighter);
+
+    color: var(--color-neutral-0);
+
+    text-wrap: balance;
+}
+
+main > header p:last-child {
+    margin: 0;
+
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+
+    color: rgb(255 255 255 / 0.82);
+
+    text-wrap: pretty;
+}
+
+@media (min-width: 768px) {
+    main > header p:last-child {
+        font-size: var(--font-size-lg);
+    }
+}
+
+
+/* ==========================================================================
+   08. SECTION CHUNG
+   ========================================================================== */
+
+main > section > h2 {
+    margin: 0 0 var(--space-5);
+
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-tight);
+
+    color: var(--color-neutral-900);
+
+    padding-bottom: var(--space-3);
+
+    border-bottom: 2px solid var(--color-border);
+}
+
+@media (min-width: 768px) {
+    main > section > h2 {
+        font-size: var(--font-size-2xl);
+    }
+}
+
+
+/* ==========================================================================
+   09. ERROR SECTION
+   ========================================================================== */
+
+main > section:has(> h2:first-child:matches("Cần xử lý trước khi cài đặt")) {
+    border-color: var(--color-danger-200);
+    background-color: var(--color-danger-50);
+}
+
+main > section > h2 + ul {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+main > section > h2 + ul > li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    padding: var(--space-3) var(--space-4);
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+
+    background-color: var(--color-bg-elevated);
+
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-neutral-400);
+    border-radius: var(--radius-lg);
+}
+
+/* Error items */
+
+main > section:first-of-type > ul > li,
+main > section > h2 + ul.error-list > li {
+    background-color: var(--color-danger-50);
+    border-color: var(--color-danger-200);
+    border-left-color: var(--color-danger-500);
+    color: var(--color-danger-800);
+}
+
+main > section:first-of-type > ul > li::before,
+main > section > h2 + ul.error-list > li::before {
+    content: "!";
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 20px;
+    height: 20px;
+
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-danger-600);
+
+    border-radius: var(--radius-full);
+
+    margin-top: 2px;
+}
+
+/* Warning items */
+
+main > section.warning-section > ul > li,
+main > section > h2 + ul.warning-list > li {
+    background-color: var(--color-warning-50);
+    border-color: var(--color-warning-200);
+    border-left-color: var(--color-warning-500);
+    color: var(--color-warning-800);
+}
+
+main > section.warning-section > ul > li::before,
+main > section > h2 + ul.warning-list > li::before {
+    content: "!";
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 20px;
+    height: 20px;
+
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-warning-600);
+
+    border-radius: var(--radius-full);
+
+    margin-top: 2px;
+}
+
+
+/* ==========================================================================
+   10. WARNING SECTION
+   ========================================================================== */
+
+main > section.warning-section {
+    background-color: var(--color-warning-50);
+    border-color: var(--color-warning-200);
+}
+
+main > section.warning-section > h2 {
+    color: var(--color-warning-800);
+    border-bottom-color: var(--color-warning-200);
+}
+
+
+/* ==========================================================================
+   11. ENVIRONMENT CHECK (DL)
+   ========================================================================== */
+
+main > section > dl {
+    display: grid;
+
+    grid-template-columns: 1fr;
+
+    gap: var(--space-3);
+
+    margin: 0;
+    padding: 0;
+}
+
+@media (min-width: 640px) {
+    main > section > dl {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--space-4);
+    }
+}
+
+main > section > dl > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+
+    padding: var(--space-3) var(--space-4);
+
+    background-color: var(--color-bg-subtle);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+
+    transition:
+        border-color var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+main > section > dl > div:hover {
+    border-color: var(--color-border-strong);
+}
+
+main > section > dl > div > dt {
+    margin: 0;
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-snug);
+
+    color: var(--color-text-muted);
+}
+
+main > section > dl > div > dd {
+    margin: 0;
+
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+
+    color: var(--color-text);
+}
+
+/* Status OK */
+
+main > section > dl > div > dd:is(
+    :matches("OK"),
+    :matches("Ok"),
+    :matches("ok")
+) {
+    color: var(--color-success-700);
+}
+
+/* Status lỗi */
+
+main > section > dl > div > dd:is(
+    :matches("Thiếu"),
+    :matches("Missing")
+) {
+    color: var(--color-danger-700);
+}
+
+
+/* ==========================================================================
+   12. ADMIN FORM SECTION
+   ========================================================================== */
+
+main > section:has(form) {
+    background-color: var(--color-bg-elevated);
+}
+
+main > section > form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+
+/* ==========================================================================
+   13. FORM FIELDS
+   ========================================================================== */
+
+form > div {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    min-width: 0;
+}
+
+form > div > label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+
+    color: var(--color-text);
+}
+
+/* form > div > label[for]::after {
+    /* dấu bắt buộc nếu input có required — chỉ hỗ trợ :has */
+/* } */
+
+form > div:has(input:required) > label::after {
+    content: "*";
+
+    color: var(--color-danger-600);
+    font-weight: var(--font-weight-bold);
+
+    margin-left: 2px;
+}
+
+/* Input */
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"],
+form input[type="search"],
+form input[type="url"],
+form input[type="number"] {
+    width: 100%;
+
+    padding: var(--space-3) var(--space-4);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+
+    color: var(--color-text);
+
+    background-color: var(--color-neutral-0);
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
+
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+form input[type="text"]:hover,
+form input[type="email"]:hover,
+form input[type="password"]:hover,
+form input[type="search"]:hover,
+form input[type="url"]:hover,
+form input[type="number"]:hover {
+    border-color: var(--color-neutral-400);
+}
+
+form input[type="text"]:focus,
+form input[type="email"]:focus,
+form input[type="password"]:focus,
+form input[type="search"]:focus,
+form input[type="url"]:focus,
+form input[type="number"]:focus {
+    outline: none;
+
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.18);
+}
+
+form input[type="text"]:focus-visible,
+form input[type="email"]:focus-visible,
+form input[type="password"]:focus-visible,
+form input[type="search"]:focus-visible,
+form input[type="url"]:focus-visible,
+form input[type="number"]:focus-visible {
+    outline: none;
+}
+
+form input::placeholder {
+    color: var(--color-text-subtle);
+    opacity: 0.85;
+}
+
+form input:disabled {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-subtle);
+    cursor: not-allowed;
+}
+
+/* Help text */
+
+form > div > p {
+    margin: 0;
+
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+
+    color: var(--color-text-subtle);
+}
+
+/* --------------------------------------------------------------------------
+   13.1. Password field — dấu hiệu an toàn
+   -------------------------------------------------------------------------- */
+
+form input[type="password"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+}
+
+form input[type="password"]::placeholder {
+    letter-spacing: normal;
+    font-family: var(--font-sans);
+}
+
+
+/* ==========================================================================
+   14. FORM VALIDATION STATES
+   ========================================================================== */
+
+/* Invalid */
+
+form input:invalid:not(:placeholder-shown):not(:focus) {
+    border-color: var(--color-danger-400);
+    background-color: var(--color-danger-50);
+}
+
+form input:invalid:not(:placeholder-shown):not(:focus):hover {
+    border-color: var(--color-danger-500);
+}
+
+form input:invalid:not(:placeholder-shown):focus {
+    border-color: var(--color-danger-500);
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 0.18);
+}
+
+/* Valid */
+
+form input:valid:not(:placeholder-shown):not(:focus) {
+    border-color: var(--color-success-400);
+}
+
+form input:valid:not(:placeholder-shown):focus {
+    border-color: var(--color-success-500);
+    box-shadow: 0 0 0 3px rgb(34 197 94 / 0.15);
+}
+
+/* Không có placeholder — chỉ áp dụng cho required */
+
+form input:required:invalid:not(:focus) {
+    background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%23dc2626'><path fill-rule='evenodd' d='M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v4a1 1 0 102 0V7zm-1 8a1 1 0 100-2 1 1 0 000 2z' clip-rule='evenodd'/></svg>");
+
+    background-repeat: no-repeat;
+    background-position: right var(--space-3) center;
+    background-size: 20px 20px;
+
+    padding-right: var(--space-10);
+}
+
+
+/* ==========================================================================
+   15. BUTTONS
+   ========================================================================== */
+
+form button[type="submit"] {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    align-self: flex-start;
+
+    min-width: 200px;
+
+    padding: var(--space-3-5) var(--space-8);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wide);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+
+    border: 1px solid var(--color-brand-600);
+    border-radius: var(--radius-xl);
+
+    cursor: pointer;
+    user-select: none;
+
+    box-shadow: var(--shadow-brand);
+
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+form button[type="submit"]:hover {
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-brand-lg);
+}
+
+form button[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+form button[type="submit"]:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+}
+
+form button[type="submit"]:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* Khi màn hình nhỏ, nút full width */
+
+@media (max-width: 479px) {
+    form button[type="submit"] {
+        width: 100%;
+        align-self: stretch;
+    }
+}
+
+
+/* ==========================================================================
+   16. SUCCESS SECTION
+   ========================================================================== */
+
+main > section:has(> h1:first-child),
+main > section.success-section {
+    text-align: center;
+
+    background:
+        linear-gradient(
+            160deg,
+            var(--color-success-50) 0%,
+            var(--color-success-100) 100%
+        );
+
+    border-color: var(--color-success-200);
+
+    box-shadow: var(--shadow-md);
+}
+
+main > section:has(> h1:first-child)::before,
+main > section.success-section::before {
+    content: "✓";
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 72px;
+    height: 72px;
+
+    margin: 0 auto var(--space-5);
+
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+    background:
+        linear-gradient(
+            135deg,
+            var(--color-success-500),
+            var(--color-success-700)
+        );
+
+    border-radius: var(--radius-full);
+
+    box-shadow: var(--shadow-success);
+}
+
+main > section:has(> h1:first-child) > h1,
+main > section.success-section > h1 {
+    margin: 0 0 var(--space-3);
+
+    font-size: clamp(1.5rem, 1.3rem + 1.2vw, var(--font-size-3xl));
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+
+    color: var(--color-success-900);
+
+    text-wrap: balance;
+}
+
+main > section:has(> h1:first-child) > p,
+main > section.success-section > p {
+    margin: 0;
+
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+
+    color: var(--color-success-800);
+
+    text-wrap: pretty;
+}
+
+main > section:has(> h1:first-child) > p + p,
+main > section.success-section > p + p {
+    margin-top: var(--space-2);
+}
+
+main > section:has(> h1:first-child) > h2,
+main > section.success-section > h2 {
+    margin: var(--space-8) 0 var(--space-4);
+
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-snug);
+
+    color: var(--color-success-900);
+}
+
+main > section:has(> h1:first-child) > p:last-child,
+main > section.success-section > p:last-child {
+    margin-top: var(--space-6);
+}
+
+main > section:has(> h1:first-child) > p:last-child a,
+main > section.success-section > p:last-child a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    padding: var(--space-3) var(--space-6);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wide);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-success-600);
+
+    border-radius: var(--radius-xl);
+
+    text-decoration: none;
+
+    box-shadow: var(--shadow-success);
+
+    transition:
+        background-color var(--transition-fast),
+        transform var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+main > section:has(> h1:first-child) > p:last-child a:hover,
+main > section.success-section > p:last-child a:hover {
+    color: var(--color-neutral-0);
+    background-color: var(--color-success-700);
+
+    transform: translateY(-2px);
+    box-shadow:
+        0 14px 30px -10px rgb(22 163 74 / 0.55);
+}
+
+main > section:has(> h1:first-child) > p:last-child a::after,
+main > section.success-section > p:last-child a::after {
+    content: "→";
+    display: inline-block;
+    font-size: 1.05em;
+    line-height: 1;
+
+    transition: transform var(--transition-base);
+}
+
+main > section:has(> h1:first-child) > p:last-child a:hover::after,
+main > section.success-section > p:last-child a:hover::after {
+    transform: translateX(3px);
+}
+
+
+/* ==========================================================================
+   17. ORDERED LIST — BƯỚC TIẾP THEO
+   ========================================================================== */
+
+main > section > ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    counter-reset: step-counter;
+
+    text-align: left;
+
+    max-width: 560px;
+    margin-inline: auto;
+}
+
+main > section > ol > li {
+    position: relative;
+
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+
+    padding: var(--space-4) var(--space-5);
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+
+    color: var(--color-success-900);
+
+    background-color: rgb(255 255 255 / 0.7);
+
+    border: 1px solid var(--color-success-200);
+    border-radius: var(--radius-lg);
+
+    counter-increment: step-counter;
+
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+main > section > ol > li:hover {
+    background-color: rgb(255 255 255 / 0.95);
+    border-color: var(--color-success-300);
+
+    transform: translateX(2px);
+}
+
+main > section > ol > li::before {
+    content: counter(step-counter);
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 28px;
+    height: 28px;
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-success-600);
+
+    border-radius: var(--radius-full);
+
+    margin-top: 2px;
+}
+
+
+/* ==========================================================================
+   18. CODE & INLINE ELEMENTS
+   ========================================================================== */
+
+main code {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+    font-weight: var(--font-weight-semibold);
+
+    padding: 0.125em 0.45em;
+
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-sm);
+
+    white-space: nowrap;
+
+    word-break: keep-all;
+}
+
+main > section:has(> h1:first-child) code,
+main > section.success-section code {
+    color: var(--color-success-800);
+    background-color: rgb(255 255 255 / 0.85);
+    border-color: var(--color-success-200);
+}
+
+main > section:first-of-type code,
+main > section:has(> h2:first-child:matches("Cần xử lý trước khi cài đặt")) code {
+    color: var(--color-danger-800);
+    background-color: rgb(255 255 255 / 0.85);
+    border-color: var(--color-danger-200);
+}
+
+
+/* ==========================================================================
+   19. UTILITIES
+   ========================================================================== */
+
+.u-hidden { display: none !important; }
+.u-block { display: block !important; }
+.u-inline-block { display: inline-block !important; }
+.u-flex { display: flex !important; }
+.u-inline-flex { display: inline-flex !important; }
+.u-grid { display: grid !important; }
+
+.u-items-center { align-items: center !important; }
+.u-items-start { align-items: flex-start !important; }
+.u-items-end { align-items: flex-end !important; }
+.u-justify-center { justify-content: center !important; }
+.u-justify-between { justify-content: space-between !important; }
+.u-flex-wrap { flex-wrap: wrap !important; }
+.u-flex-col { flex-direction: column !important; }
+.u-gap-2 { gap: var(--space-2) !important; }
+.u-gap-4 { gap: var(--space-4) !important; }
+.u-gap-6 { gap: var(--space-6) !important; }
+
+.u-text-center { text-align: center !important; }
+.u-text-left { text-align: left !important; }
+.u-text-right { text-align: right !important; }
+.u-text-muted { color: var(--color-text-muted) !important; }
+.u-text-subtle { color: var(--color-text-subtle) !important; }
+.u-text-brand { color: var(--color-brand-700) !important; }
+.u-text-danger { color: var(--color-danger-700) !important; }
+.u-text-success { color: var(--color-success-700) !important; }
+.u-text-warning { color: var(--color-warning-800) !important; }
+.u-uppercase { text-transform: uppercase !important; }
+
+.u-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.u-mt-0 { margin-top: 0 !important; }
+.u-mt-4 { margin-top: var(--space-4) !important; }
+.u-mt-8 { margin-top: var(--space-8) !important; }
+.u-mb-0 { margin-bottom: 0 !important; }
+.u-mb-4 { margin-bottom: var(--space-4) !important; }
+.u-mb-8 { margin-bottom: var(--space-8) !important; }
+
+.u-divider {
+    height: 1px;
+    width: 100%;
+    background-color: var(--color-border);
+    border: none;
+    margin: var(--space-8) 0;
+}
+
+
+/* ==========================================================================
+   20. RESPONSIVE
+   ========================================================================== */
+
+@media (min-width: 480px) {
+    main > header h1 {
+        font-size: var(--font-size-3xl);
+    }
+}
+
+@media (min-width: 640px) {
+    :root {
+        --container-max: 900px;
+    }
+}
+
+@media (min-width: 768px) {
+    :root {
+        --container-max: 960px;
+    }
+
+    main > header {
+        padding-block: var(--space-14);
+    }
+}
+
+@media (min-width: 1024px) {
+    :root {
+        --container-max: 1000px;
+    }
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --container-max: 1080px;
+    }
+}
+
+@media (min-width: 1536px) {
+    :root {
+        --container-max: 1200px;
+    }
+}
+
+@media (max-width: 479px) {
+    :root {
+        --container-padding: var(--space-3);
+        --font-size-md: 0.9375rem;
+    }
+
+    main > section,
+    main > header {
+        padding: var(--space-5);
+        border-radius: var(--radius-xl);
+    }
+
+    main > header h1 {
+        font-size: var(--font-size-2xl);
+    }
+
+    main > section > h2 {
+        font-size: var(--font-size-lg);
+    }
+
+    main > section > ol > li {
+        padding: var(--space-3) var(--space-4);
+    }
+}
+
+@media (max-width: 379px) {
+    :root {
+        --container-padding: var(--space-3);
+    }
+
+    main {
+        gap: var(--space-4);
+    }
+
+    main > section,
+    main > header {
+        padding: var(--space-4);
+    }
+
+    main > section > ol > li::before {
+        width: 24px;
+        height: 24px;
+        font-size: var(--font-size-xs);
+    }
+}
+
+
+/* ==========================================================================
+   21. DARK MODE
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --color-bg:            #0b1120;
+        --color-bg-elevated:   #131c31;
+        --color-bg-subtle:     #1a2438;
+        --color-bg-inverse:    var(--color-neutral-50);
+        --color-bg-code:       #1a2438;
+
+        --color-text:          #e8edf7;
+        --color-text-muted:    #a3b0c7;
+        --color-text-subtle:   #8290a8;
+        --color-text-inverse:  var(--color-neutral-900);
+
+        --color-border:        #253149;
+        --color-border-strong: #33415c;
+        --color-border-subtle: #1c273c;
+
+        --color-ring:          var(--color-brand-400);
+
+        --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.40), 0 1px 2px -1px rgb(0 0 0 / 0.30);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.40), 0 2px 4px -2px rgb(0 0 0 / 0.30);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.30);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.50), 0 8px 10px -6px rgb(0 0 0 / 0.35);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.65);
+    }
+
+    body::before {
+        background:
+            radial-gradient(
+                1200px 600px at 80% -10%,
+                rgb(99 102 241 / 0.14),
+                transparent 60%
+            ),
+            radial-gradient(
+                900px 500px at 0% 0%,
+                rgb(245 158 11 / 0.08),
+                transparent 55%
+            );
+    }
+
+    main > header {
+        background:
+            linear-gradient(
+                150deg,
+                #1e1b4b 0%,
+                #252160 45%,
+                #0f0d2e 100%
+            );
+    }
+
+    main > section > h2 {
+        color: var(--color-text);
+        border-bottom-color: var(--color-border);
+    }
+
+    main > section > dl > div {
+        background-color: var(--color-bg-subtle);
+        border-color: var(--color-border);
+    }
+
+    main > section > dl > div:hover {
+        border-color: var(--color-border-strong);
+    }
+
+    main > section > dl > div > dt {
+        color: var(--color-text-muted);
+    }
+
+    main > section > dl > div > dd {
+        color: var(--color-text);
+    }
+
+    form input[type="text"],
+    form input[type="email"],
+    form input[type="password"],
+    form input[type="search"],
+    form input[type="url"],
+    form input[type="number"] {
+        color: var(--color-text);
+        background-color: #0f1830;
+        border-color: var(--color-border-strong);
+    }
+
+    form input:focus {
+        background-color: #131c31;
+    }
+
+    main code {
+        color: var(--color-brand-300);
+        background-color: rgb(99 102 241 / 0.16);
+        border-color: rgb(99 102 241 / 0.28);
+    }
+
+    /* Error section */
+
+    main > section:has(> h2:first-child:matches("Cần xử lý trước khi cài đặt")) {
+        background-color: rgb(127 29 29 / 0.20);
+        border-color: rgb(220 38 38 / 0.35);
+    }
+
+    main > section:first-of-type > ul > li,
+    main > section > h2 + ul.error-list > li {
+        background-color: rgb(127 29 29 / 0.28);
+        border-color: rgb(220 38 38 / 0.35);
+        border-left-color: var(--color-danger-500);
+        color: #fecaca;
+    }
+
+    /* Warning section */
+
+    main > section.warning-section {
+        background-color: rgb(120 53 15 / 0.20);
+        border-color: rgb(217 119 6 / 0.35);
+    }
+
+    main > section.warning-section > h2 {
+        color: var(--color-warning-300);
+        border-bottom-color: rgb(217 119 6 / 0.35);
+    }
+
+    main > section.warning-section > ul > li,
+    main > section > h2 + ul.warning-list > li {
+        background-color: rgb(120 53 15 / 0.28);
+        border-color: rgb(217 119 6 / 0.35);
+        border-left-color: var(--color-warning-500);
+        color: #fde68a;
+    }
+
+    /* Success section */
+
+    main > section:has(> h1:first-child),
+    main > section.success-section {
+        background:
+            linear-gradient(
+                160deg,
+                rgb(20 83 45 / 0.35) 0%,
+                rgb(22 101 52 / 0.25) 100%
+            );
+        border-color: rgb(22 163 74 / 0.40);
+    }
+
+    main > section:has(> h1:first-child) > h1,
+    main > section.success-section > h1 {
+        color: var(--color-success-300);
+    }
+
+    main > section:has(> h1:first-child) > p,
+    main > section.success-section > p {
+        color: var(--color-success-200);
+    }
+
+    main > section:has(> h1:first-child) > h2,
+    main > section.success-section > h2 {
+        color: var(--color-success-300);
+    }
+
+    main > section > ol > li {
+        color: var(--color-success-200);
+        background-color: rgb(255 255 255 / 0.05);
+        border-color: rgb(22 163 74 / 0.35);
+    }
+
+    main > section > ol > li:hover {
+        background-color: rgb(255 255 255 / 0.08);
+        border-color: rgb(22 163 74 / 0.55);
+    }
+
+    main > section:has(> h1:first-child) code,
+    main > section.success-section code {
+        color: var(--color-success-200);
+        background-color: rgb(255 255 255 / 0.08);
+        border-color: rgb(22 163 74 / 0.40);
+    }
+
+    ::selection {
+        background-color: var(--color-brand-700);
+        color: var(--color-neutral-0);
+    }
+
+    mark {
+        background-color: var(--color-accent-700);
+        color: var(--color-accent-50);
+    }
+}
+
+
+/* ==========================================================================
+   22. REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+
+    form button[type="submit"]:hover,
+    main > section > ol > li:hover,
+    main > section:has(> h1:first-child) > p:last-child a:hover,
+    main > section.success-section > p:last-child a:hover {
+        transform: none;
+    }
+}
+
+
+/* ==========================================================================
+   23. HIGH CONTRAST
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+
+    :root {
+        --color-text-muted: var(--color-neutral-700);
+        --color-text-subtle: var(--color-neutral-700);
+        --color-border: var(--color-neutral-400);
+        --color-border-strong: var(--color-neutral-500);
+    }
+
+    form input {
+        border-width: 2px;
+    }
+
+    form button[type="submit"] {
+        border-width: 2px;
+    }
+
+    main > section,
+    main > header {
+        border-width: 2px;
+    }
+
+    main > section > dl > div {
+        border-width: 2px;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+        outline-width: 3px;
+    }
+}
+
+
+/* ==========================================================================
+   24. FORCED COLORS MODE
+   ========================================================================== */
+
+@media (forced-colors: active) {
+
+    main > section,
+    main > header,
+    main > footer {
+        border: 1px solid CanvasText;
+    }
+
+    form input,
+    form button[type="submit"] {
+        border: 1px solid CanvasText;
+    }
+
+    main > section > dl > div {
+        border: 1px solid CanvasText;
+    }
+
+    main > section > ol > li {
+        border: 1px solid CanvasText;
+    }
+
+    code {
+        border: 1px solid CanvasText;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
+
+/* ==========================================================================
+   25. PRINT
+   ========================================================================== */
+
+@media print {
+
+    :root {
+        --color-bg: #ffffff;
+        --color-bg-elevated: #ffffff;
+        --color-text: #000000;
+        --color-text-muted: #333333;
+        --color-border: #cccccc;
+    }
+
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    html,
+    body {
+        font-size: 11pt;
+        line-height: 1.4;
+        padding: 0;
+    }
+
+    body::before {
+        display: none !important;
+    }
+
+    main {
+        max-width: 100%;
+        padding: 0;
+        gap: 12pt;
+    }
+
+    main > section,
+    main > header {
+        padding: 12pt;
+        border: 1pt solid #999;
+        border-radius: 0;
+
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    main > header {
+        background: none !important;
+        color: #000 !important;
+    }
+
+    main > header h1 {
+        color: #000 !important;
+    }
+
+    main > header p {
+        color: #333 !important;
+    }
+
+    main > header p:first-child {
+        background: none !important;
+        border: none !important;
+        padding: 0;
+        color: #000 !important;
+    }
+
+    main > header p:first-child::before {
+        display: none;
+    }
+
+    form {
+        display: none;
+    }
+
+    main > section > ol > li {
+        background: none !important;
+        border: 1pt solid #999;
+    }
+
+    main > section > dl > div {
+        background: none !important;
+        border: 1pt solid #999;
+    }
+
+    code {
+        background: none !important;
+        border: 1pt solid #999;
+        color: #000 !important;
+    }
+
+    a[href]::after {
+        content: "";
+    }
+}
+
+
+/* ==========================================================================
+   26. SCROLLBAR
+   ========================================================================== */
+
+@supports selector(::-webkit-scrollbar) {
+
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background-color: var(--color-bg-subtle);
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: var(--color-neutral-300);
+        border: 3px solid var(--color-bg-subtle);
+        border-radius: var(--radius-full);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--color-neutral-400);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        ::-webkit-scrollbar-thumb {
+            background-color: #33415c;
+            border-color: var(--color-bg-subtle);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #44546e;
+        }
+    }
+}
+
+@supports (scrollbar-color: auto) {
+    html {
+        scrollbar-color: var(--color-neutral-300) var(--color-bg-subtle);
+        scrollbar-width: thin;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        html {
+            scrollbar-color: #33415c var(--color-bg-subtle);
+        }
+    }
+}
+
+
+/* ==========================================================================
+   27. ANIMATIONS
+   ========================================================================== */
+
+@keyframes install-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes install-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes install-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes install-check-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.4);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes install-skeleton {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+main > section,
+main > header {
+    animation: install-fade-in var(--duration-500) var(--ease-smooth) both;
+}
+
+main > header {
+    animation-delay: 0ms;
+}
+
+main > section:nth-child(2) {
+    animation-delay: 80ms;
+}
+
+main > section:nth-child(3) {
+    animation-delay: 160ms;
+}
+
+main > section:nth-child(4) {
+    animation-delay: 240ms;
+}
+
+main > section:nth-child(n+5) {
+    animation-delay: 320ms;
+}
+
+main > section:has(> h1:first-child)::before,
+main > section.success-section::before {
+    animation: install-check-pop var(--duration-500) var(--ease-spring) both;
+    animation-delay: 200ms;
+}
+
+main > section > ol > li {
+    animation: install-slide-in var(--duration-300) var(--ease-smooth) both;
+}
+
+main > section > ol > li:nth-child(1) { animation-delay: 100ms; }
+main > section > ol > li:nth-child(2) { animation-delay: 160ms; }
+main > section > ol > li:nth-child(3) { animation-delay: 220ms; }
+main > section > ol > li:nth-child(4) { animation-delay: 280ms; }
+main > section > ol > li:nth-child(n+5) { animation-delay: 340ms; }
+
+.skeleton {
+    background-color: var(--color-neutral-200);
+    border-radius: var(--radius-md);
+    animation: install-skeleton 1.6s var(--ease-in-out) infinite;
+    background-image:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgb(255 255 255 / 0.4) 50%,
+            transparent 100%
+        );
+    background-size: 200% 100%;
+}
+
+@media (prefers-color-scheme: dark) {
+    .skeleton {
+        background-color: #253149;
+        background-image:
+            linear-gradient(
+                90deg,
+                transparent 0%,
+                rgb(255 255 255 / 0.06) 50%,
+                transparent 100%
+            );
+    }
+}
+
+
+/* ==========================================================================
+   28. FINAL OVERRIDES
+   ========================================================================== */
+
+/* Đảm bảo input không bị co */
+form input {
+    min-width: 0;
+}
+
+/* Đảm bảo main luôn căn giữa */
+main {
+    margin-inline: auto;
+}
+
+/* Không cho phép zoom text gây vỡ layout */
+main > header h1 {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+main > section > h2,
+main > section > ol > li,
+main > section > dl > div > dd {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Focus ring cho tất cả phần tử tương tác */
+input:focus-visible,
+button:focus-visible,
+a:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+}
+
+/* Bỏ outline mặc định cho input trong form khi đã có box-shadow */
+form input:focus {
+    outline: none;
+}
+
+/* Đảm bảo nút submit không bị xuống dòng */
+form button[type="submit"] {
+    white-space: nowrap;
+}
+
+/* Tránh lỗi hiển thị khi có quá nhiều lỗi */
+main > section > h2 + ul {
+    max-height: 420px;
+    overflow-y: auto;
+    padding-right: var(--space-2);
+}
+
+/* Thanh cuộn cho danh sách lỗi */
+main > section > h2 + ul::-webkit-scrollbar {
+    width: 8px;
+}
+
+main > section > h2 + ul::-webkit-scrollbar-thumb {
+    background-color: var(--color-neutral-300);
+    border-radius: var(--radius-full);
+}
+
+/* Đảm bảo section có h2 màu đúng khi ở chế độ tối */
+@media (prefers-color-scheme: dark) {
+    main > section > h2 {
+        color: var(--color-text);
+    }
+}
+
+
+/* ==========================================================================
+   KẾT THÚC INSTALL.CSS
+   ========================================================================== */

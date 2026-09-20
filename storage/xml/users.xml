@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<users>
+    <user>
+        <id>usr_admin_001</id>
+        <username>admin</username>
+        <password_hash>$2y$10$pGi52d1iVOg1zKHjVc8g3Op1txGLNNyRTl46HKwOq7j9SufV5aEQ6</password_hash>
+        <display_name>Quản trị viên</display_name>
+        <email/>
+        <role>admin</role>
+        <status>active</status>
+        <created_at>2026-01-01 00:00:00</created_at>
+        <updated_at>2026-09-20 18:58:02</updated_at>
+        <last_login_at>2026-09-20 18:58:02</last_login_at>
+    </user>
+</users>

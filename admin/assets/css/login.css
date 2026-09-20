@@ -1,0 +1,1662 @@
+/* ==========================================================================
+   THD ADMIN — LOGIN
+   File: admin/assets/css/login.css
+   --------------------------------------------------------------------------
+   Stylesheet cho trang đăng nhập quản trị (admin/login.php).
+
+   Mục lục:
+     01. Design tokens
+     02. Reset & normalize
+     03. Base
+     04. Typography
+     05. Accessibility
+     06. Layout — login page
+     07. Login card
+     08. Login header
+     09. Alert
+     10. Form
+     11. Fields — label, input
+     12. Button
+     13. Login footer
+     14. Utilities
+     15. Responsive
+     16. Dark mode
+     17. Reduced motion
+     18. High contrast
+     19. Forced colors
+     20. Print
+     21. Scrollbar
+     22. Animations
+     23. Final overrides
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. DESIGN TOKENS
+   ========================================================================== */
+
+:root {
+
+    /* ---------------------------------------------------------------------
+       1.1. Brand palette
+       --------------------------------------------------------------------- */
+    --color-brand-50:  #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    /* ---------------------------------------------------------------------
+       1.2. Accent palette
+       --------------------------------------------------------------------- */
+    --color-accent-200: #fde68a;
+    --color-accent-300: #fcd34d;
+    --color-accent-400: #fbbf24;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+
+    /* ---------------------------------------------------------------------
+       1.3. Neutral scale
+       --------------------------------------------------------------------- */
+    --color-neutral-0:   #ffffff;
+    --color-neutral-50:  #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+    --color-neutral-950: #020617;
+
+    /* ---------------------------------------------------------------------
+       1.4. Semantic
+       --------------------------------------------------------------------- */
+    --color-success-50:  #f0fdf4;
+    --color-success-200: #bbf7d0;
+    --color-success-500: #22c55e;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+
+    --color-danger-50:  #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-200: #fecaca;
+    --color-danger-400: #f87171;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+    --color-danger-800: #991b1b;
+    --color-danger-900: #7f1d1d;
+
+    --color-warning-50:  #fffbeb;
+    --color-warning-200: #fde68a;
+    --color-warning-500: #f59e0b;
+    --color-warning-600: #d97706;
+    --color-warning-800: #92400e;
+
+    /* ---------------------------------------------------------------------
+       1.5. Semantic surface & text
+       --------------------------------------------------------------------- */
+    --color-bg:              var(--color-neutral-50);
+    --color-bg-elevated:     var(--color-neutral-0);
+    --color-bg-subtle:       var(--color-neutral-100);
+
+    --color-text:            var(--color-neutral-900);
+    --color-text-muted:      var(--color-neutral-600);
+    --color-text-subtle:     var(--color-neutral-500);
+
+    --color-border:          var(--color-neutral-200);
+    --color-border-strong:   var(--color-neutral-300);
+    --color-border-subtle:   var(--color-neutral-100);
+
+    --color-ring:            var(--color-brand-500);
+    --color-ring-danger:     var(--color-danger-500);
+
+    /* ---------------------------------------------------------------------
+       1.6. Typography
+       --------------------------------------------------------------------- */
+    --font-sans:
+        "Be Vietnam Pro",
+        "Inter",
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        "Helvetica Neue",
+        Arial,
+        "Noto Sans",
+        sans-serif,
+        "Apple Color Emoji",
+        "Segoe UI Emoji";
+
+    --font-mono:
+        "JetBrains Mono",
+        "SFMono-Regular",
+        Consolas,
+        "Liberation Mono",
+        Menlo,
+        monospace;
+
+    --font-size-2xs: 0.6875rem;
+    --font-size-xs:  0.75rem;
+    --font-size-sm:  0.875rem;
+    --font-size-md:  1rem;
+    --font-size-lg:  1.125rem;
+    --font-size-xl:  1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    --font-weight-regular:   400;
+    --font-weight-medium:    500;
+    --font-weight-semibold:  600;
+    --font-weight-bold:      700;
+    --font-weight-extrabold: 800;
+
+    --line-height-none:    1;
+    --line-height-tight:   1.15;
+    --line-height-snug:    1.3;
+    --line-height-normal:  1.5;
+    --line-height-relaxed: 1.65;
+
+    --letter-spacing-tighter: -0.04em;
+    --letter-spacing-tight:   -0.02em;
+    --letter-spacing-normal:  0;
+    --letter-spacing-wide:    0.02em;
+    --letter-spacing-wider:   0.05em;
+    --letter-spacing-widest:  0.12em;
+
+    /* ---------------------------------------------------------------------
+       1.7. Spacing
+       --------------------------------------------------------------------- */
+    --space-0-5: 0.125rem;
+    --space-1:   0.25rem;
+    --space-1-5: 0.375rem;
+    --space-2:   0.5rem;
+    --space-2-5: 0.625rem;
+    --space-3:   0.75rem;
+    --space-3-5: 0.875rem;
+    --space-4:   1rem;
+    --space-5:   1.25rem;
+    --space-6:   1.5rem;
+    --space-7:   1.75rem;
+    --space-8:   2rem;
+    --space-10:  2.5rem;
+    --space-12:  3rem;
+    --space-14:  3.5rem;
+    --space-16:  4rem;
+    --space-20:  5rem;
+    --space-24:  6rem;
+
+    /* ---------------------------------------------------------------------
+       1.8. Radius
+       --------------------------------------------------------------------- */
+    --radius-xs:   0.125rem;
+    --radius-sm:   0.25rem;
+    --radius-md:   0.375rem;
+    --radius-lg:   0.5rem;
+    --radius-xl:   0.75rem;
+    --radius-2xl:  1rem;
+    --radius-3xl:  1.5rem;
+    --radius-full: 9999px;
+
+    /* ---------------------------------------------------------------------
+       1.9. Shadows
+       --------------------------------------------------------------------- */
+    --shadow-xs:
+        0 1px 2px 0 rgb(15 23 42 / 0.04);
+
+    --shadow-sm:
+        0 1px 3px 0 rgb(15 23 42 / 0.08),
+        0 1px 2px -1px rgb(15 23 42 / 0.06);
+
+    --shadow-md:
+        0 4px 6px -1px rgb(15 23 42 / 0.08),
+        0 2px 4px -2px rgb(15 23 42 / 0.06);
+
+    --shadow-lg:
+        0 10px 15px -3px rgb(15 23 42 / 0.08),
+        0 4px 6px -4px rgb(15 23 42 / 0.05);
+
+    --shadow-xl:
+        0 20px 25px -5px rgb(15 23 42 / 0.10),
+        0 8px 10px -6px rgb(15 23 42 / 0.06);
+
+    --shadow-2xl:
+        0 25px 50px -12px rgb(15 23 42 / 0.25);
+
+    --shadow-brand:
+        0 10px 24px -8px rgb(79 70 229 / 0.45);
+
+    --shadow-brand-lg:
+        0 18px 40px -12px rgb(79 70 229 / 0.55);
+
+    --shadow-danger:
+        0 10px 24px -8px rgb(220 38 38 / 0.35);
+
+    /* ---------------------------------------------------------------------
+       1.10. Motion
+       --------------------------------------------------------------------- */
+    --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --duration-100: 100ms;
+    --duration-150: 150ms;
+    --duration-200: 200ms;
+    --duration-300: 300ms;
+    --duration-500: 500ms;
+    --duration-700: 700ms;
+
+    --transition-fast: var(--duration-150) var(--ease-out);
+    --transition-base: var(--duration-200) var(--ease-out);
+    --transition-slow: var(--duration-300) var(--ease-out);
+
+    /* ---------------------------------------------------------------------
+       1.11. Layout
+       --------------------------------------------------------------------- */
+    --container-max:     440px;
+    --container-padding: var(--space-4);
+
+    --z-base:    1;
+    --z-sticky:  200;
+    --z-overlay: 300;
+    --z-toast:   500;
+}
+
+
+@media (min-width: 640px) {
+    :root { --container-padding: var(--space-6); }
+}
+
+
+/* ==========================================================================
+   02. RESET & NORMALIZE
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    tab-size: 4;
+    height: 100%;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+img {
+    border-style: none;
+    font-style: italic;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    margin: 0;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+fieldset {
+    border: none;
+    margin: 0;
+    padding: 0;
+}
+
+legend {
+    padding: 0;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+::selection {
+    background-color: var(--color-brand-200);
+    color: var(--color-brand-950);
+}
+
+
+/* ==========================================================================
+   03. BASE
+   ========================================================================== */
+
+html {
+    font-size: 100%;
+}
+
+body.admin-login-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    padding: var(--space-6) var(--container-padding);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-normal);
+
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    overflow-x: hidden;
+    position: relative;
+
+    isolation: isolate;
+}
+
+/* --------------------------------------------------------------------------
+   3.1. Nền trang — gradient + hoa văn
+   -------------------------------------------------------------------------- */
+
+body.admin-login-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            150deg,
+            var(--color-brand-800) 0%,
+            var(--color-brand-700) 42%,
+            var(--color-brand-900) 100%
+        );
+}
+
+body.admin-login-page::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image:
+        radial-gradient(
+            circle at 18% 22%,
+            rgb(255 255 255 / 0.14) 0,
+            transparent 42%
+        ),
+        radial-gradient(
+            circle at 82% 78%,
+            rgb(251 191 36 / 0.20) 0,
+            transparent 48%
+        ),
+        radial-gradient(
+            circle at 50% 120%,
+            rgb(255 255 255 / 0.10) 0,
+            transparent 60%
+        ),
+        linear-gradient(
+            rgb(255 255 255 / 0.05) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgb(255 255 255 / 0.05) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        auto,
+        auto,
+        auto,
+        56px 56px,
+        56px 56px;
+
+    opacity: 0.85;
+}
+
+/* Vignette nhẹ */
+body.admin-login-page::selection {
+    background-color: var(--color-accent-400);
+    color: var(--color-neutral-900);
+}
+
+
+/* ==========================================================================
+   04. TYPOGRAPHY
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+h1 {
+    font-size: clamp(1.5rem, 1.3rem + 1vw, var(--font-size-2xl));
+    font-weight: var(--font-weight-extrabold);
+    letter-spacing: var(--letter-spacing-tighter);
+}
+
+p {
+    line-height: var(--line-height-relaxed);
+    text-wrap: pretty;
+}
+
+strong,
+b {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+small {
+    font-size: var(--font-size-sm);
+}
+
+/* --------------------------------------------------------------------------
+   4.1. Links
+   -------------------------------------------------------------------------- */
+
+a {
+    color: var(--color-brand-700);
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        opacity var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-brand-800);
+}
+
+a:active {
+    color: var(--color-brand-900);
+}
+
+a:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+}
+
+
+/* ==========================================================================
+   05. ACCESSIBILITY
+   ========================================================================== */
+
+.visually-hidden,
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.skip-link {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    z-index: var(--z-toast);
+
+    padding: var(--space-3) var(--space-5);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-700);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+
+    transform: translateY(-150%);
+    transition: transform var(--transition-base);
+}
+
+.skip-link:focus {
+    transform: translateY(0);
+    color: var(--color-neutral-0);
+}
+
+
+/* ==========================================================================
+   06. LAYOUT — LOGIN PAGE
+   ========================================================================== */
+
+.admin-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    max-width: var(--container-max);
+    margin: 0 auto;
+
+    flex: 1 0 auto;
+}
+
+@media (min-width: 640px) {
+    .admin-login {
+        min-height: 520px;
+    }
+}
+
+
+/* ==========================================================================
+   07. LOGIN CARD
+   ========================================================================== */
+
+.admin-login-card {
+    position: relative;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+
+    width: 100%;
+
+    padding: var(--space-7) var(--space-6);
+
+    background-color: var(--color-bg-elevated);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-3xl);
+
+    box-shadow:
+        var(--shadow-2xl),
+        0 40px 80px -30px rgb(15 23 42 / 0.55);
+
+    animation: login-card-in var(--duration-500) var(--ease-smooth) both;
+}
+
+@media (min-width: 640px) {
+    .admin-login-card {
+        padding: var(--space-10);
+        gap: var(--space-8);
+    }
+}
+
+/* Dải màu trên đầu card */
+.admin-login-card::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    height: 4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--color-brand-600),
+            var(--color-brand-400),
+            var(--color-accent-400)
+        );
+}
+
+
+/* ==========================================================================
+   08. LOGIN HEADER
+   ========================================================================== */
+
+.admin-login-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+
+    text-align: center;
+}
+
+/* School name eyebrow */
+
+.admin-login-school {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin: 0;
+
+    padding: var(--space-1-5) var(--space-4);
+
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-widest);
+    text-transform: uppercase;
+
+    color: var(--color-brand-700);
+
+    background-color: var(--color-brand-50);
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-full);
+
+    white-space: nowrap;
+
+    max-width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.admin-login-school::before {
+    content: "";
+
+    width: 6px;
+    height: 6px;
+
+    border-radius: var(--radius-full);
+    background-color: var(--color-brand-500);
+
+    flex: 0 0 auto;
+}
+
+/* Title */
+
+.admin-login-header h1 {
+    margin: var(--space-2) 0 0;
+
+    font-size: clamp(1.5rem, 1.3rem + 1vw, var(--font-size-2xl));
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tighter);
+
+    color: var(--color-neutral-900);
+
+    text-wrap: balance;
+}
+
+/* Description */
+
+.admin-login-description {
+    margin: 0;
+
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    letter-spacing: var(--letter-spacing-wide);
+
+    color: var(--color-text-subtle);
+}
+
+
+/* ==========================================================================
+   09. ALERT
+   ========================================================================== */
+
+.admin-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+
+    padding: var(--space-3-5) var(--space-4);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+
+    border-radius: var(--radius-xl);
+
+    animation: login-alert-in var(--duration-300) var(--ease-smooth) both;
+}
+
+.admin-alert::before {
+    content: "!";
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    flex: 0 0 auto;
+
+    width: 22px;
+    height: 22px;
+
+    margin-top: 1px;
+
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+
+    border-radius: var(--radius-full);
+}
+
+/* Error */
+
+.admin-alert-error {
+    color: var(--color-danger-800);
+    background-color: var(--color-danger-50);
+    border: 1px solid var(--color-danger-200);
+}
+
+.admin-alert-error::before {
+    background-color: var(--color-danger-600);
+}
+
+/* Warning (dự phòng) */
+
+.admin-alert-warning {
+    color: var(--color-warning-800);
+    background-color: var(--color-warning-50);
+    border: 1px solid var(--color-warning-200);
+}
+
+.admin-alert-warning::before {
+    background-color: var(--color-warning-600);
+}
+
+/* Success (dự phòng) */
+
+.admin-alert-success {
+    color: var(--color-success-700);
+    background-color: var(--color-success-50);
+    border: 1px solid var(--color-success-200);
+}
+
+.admin-alert-success::before {
+    content: "✓";
+    background-color: var(--color-success-600);
+}
+
+
+/* ==========================================================================
+   10. FORM
+   ========================================================================== */
+
+.admin-login-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+
+/* ==========================================================================
+   11. FIELDS
+   ========================================================================== */
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+
+    min-width: 0;
+}
+
+.form-field label {
+    display: block;
+
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wider);
+    text-transform: uppercase;
+
+    color: var(--color-text-muted);
+}
+
+.form-field input[type="text"],
+.form-field input[type="password"],
+.form-field input[type="email"] {
+    width: 100%;
+
+    padding: var(--space-3) var(--space-4);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-normal);
+
+    color: var(--color-text);
+
+    background-color: var(--color-neutral-0);
+
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-lg);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
+
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.form-field input:hover {
+    border-color: var(--color-neutral-400);
+}
+
+.form-field input:focus {
+    outline: none;
+
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.18);
+}
+
+.form-field input:focus-visible {
+    outline: none;
+}
+
+.form-field input::placeholder {
+    color: var(--color-text-subtle);
+    opacity: 0.85;
+}
+
+.form-field input:disabled {
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text-subtle);
+    cursor: not-allowed;
+}
+
+/* Password: dùng mono để rõ ký tự */
+.form-field input[type="password"] {
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+}
+
+.form-field input[type="password"]::placeholder {
+    font-family: var(--font-sans);
+    letter-spacing: normal;
+}
+
+/* Invalid (khi browser báo lỗi) */
+.form-field input:invalid:not(:placeholder-shown):not(:focus) {
+    border-color: var(--color-danger-400);
+    background-color: var(--color-danger-50);
+}
+
+.form-field input:invalid:not(:placeholder-shown):focus {
+    border-color: var(--color-danger-500);
+    box-shadow: 0 0 0 3px rgb(239 68 68 / 0.18);
+}
+
+
+/* ==========================================================================
+   12. BUTTON
+   ========================================================================== */
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    padding: var(--space-3-5) var(--space-6);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wide);
+
+    text-align: center;
+    text-decoration: none;
+    white-space: nowrap;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-xl);
+
+    cursor: pointer;
+    user-select: none;
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-base),
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        color var(--transition-base);
+}
+
+.button:active {
+    transform: translateY(1px);
+}
+
+.button:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+}
+
+.button:disabled,
+.button[aria-disabled="true"] {
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* Primary */
+
+.button-primary {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+
+    box-shadow: var(--shadow-brand);
+}
+
+.button-primary:hover {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-brand-lg);
+}
+
+.button-primary:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* Secondary (dự phòng) */
+
+.button-secondary {
+    color: var(--color-brand-700);
+    background-color: var(--color-bg-elevated);
+    border-color: var(--color-border-strong);
+}
+
+.button-secondary:hover {
+    color: var(--color-brand-800);
+    background-color: var(--color-brand-50);
+    border-color: var(--color-brand-300);
+}
+
+/* Submit */
+
+.admin-login-submit {
+    width: 100%;
+
+    margin-top: var(--space-2);
+}
+
+
+/* ==========================================================================
+   13. LOGIN FOOTER
+   ========================================================================== */
+
+.admin-login-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-top: var(--space-5);
+
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.admin-login-footer a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    padding: var(--space-2) var(--space-3);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-none);
+
+    color: var(--color-text-muted);
+
+    border-radius: var(--radius-lg);
+
+    text-decoration: none;
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        gap var(--transition-base);
+}
+
+.admin-login-footer a::before {
+    content: "";
+    display: none;
+}
+
+.admin-login-footer a:hover {
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+    gap: var(--space-3);
+}
+
+.admin-login-footer a:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+
+/* ==========================================================================
+   14. UTILITIES
+   ========================================================================== */
+
+.u-hidden { display: none !important; }
+.u-block { display: block !important; }
+.u-inline-block { display: inline-block !important; }
+.u-flex { display: flex !important; }
+.u-inline-flex { display: inline-flex !important; }
+
+.u-items-center { align-items: center !important; }
+.u-justify-center { justify-content: center !important; }
+.u-justify-between { justify-content: space-between !important; }
+.u-flex-col { flex-direction: column !important; }
+.u-gap-2 { gap: var(--space-2) !important; }
+.u-gap-4 { gap: var(--space-4) !important; }
+
+.u-text-center { text-align: center !important; }
+.u-text-muted { color: var(--color-text-muted) !important; }
+.u-text-subtle { color: var(--color-text-subtle) !important; }
+.u-text-danger { color: var(--color-danger-700) !important; }
+
+.u-mt-0 { margin-top: 0 !important; }
+.u-mt-4 { margin-top: var(--space-4) !important; }
+.u-mb-0 { margin-bottom: 0 !important; }
+.u-mb-4 { margin-bottom: var(--space-4) !important; }
+
+.u-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   15. RESPONSIVE
+   ========================================================================== */
+
+@media (min-width: 480px) {
+    .admin-login-card {
+        padding: var(--space-8) var(--space-7);
+    }
+}
+
+@media (min-width: 640px) {
+    body.admin-login-page {
+        padding: var(--space-10) var(--container-padding);
+    }
+}
+
+@media (min-width: 1024px) {
+    body.admin-login-page {
+        padding: var(--space-14) var(--container-padding);
+    }
+
+    .admin-login-card {
+        padding: var(--space-12);
+    }
+}
+
+@media (max-width: 379px) {
+    :root {
+        --container-padding: var(--space-3);
+        --font-size-md: 0.9375rem;
+    }
+
+    body.admin-login-page {
+        padding: var(--space-4) var(--container-padding);
+    }
+
+    .admin-login-card {
+        padding: var(--space-6) var(--space-5);
+        border-radius: var(--radius-2xl);
+        gap: var(--space-5);
+    }
+
+    .admin-login-header h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .form-field input {
+        font-size: var(--font-size-sm);
+        padding: var(--space-2-5) var(--space-3);
+    }
+
+    .button {
+        font-size: var(--font-size-sm);
+        padding: var(--space-3) var(--space-5);
+    }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+    body.admin-login-page {
+        align-items: flex-start;
+        padding-block: var(--space-4);
+    }
+
+    .admin-login-card {
+        padding: var(--space-5);
+        gap: var(--space-4);
+    }
+
+    .admin-login-header {
+        gap: var(--space-1);
+    }
+}
+
+
+/* ==========================================================================
+   16. DARK MODE
+   ========================================================================== */
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --color-bg:            #0b1120;
+        --color-bg-elevated:   #131c31;
+        --color-bg-subtle:     #1a2438;
+
+        --color-text:          #e8edf7;
+        --color-text-muted:    #a3b0c7;
+        --color-text-subtle:   #8290a8;
+
+        --color-border:        #253149;
+        --color-border-strong: #33415c;
+        --color-border-subtle: #1c273c;
+
+        --color-ring:          var(--color-brand-400);
+
+        --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+        --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.40), 0 1px 2px -1px rgb(0 0 0 / 0.30);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.40), 0 2px 4px -2px rgb(0 0 0 / 0.30);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.30);
+        --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.50), 0 8px 10px -6px rgb(0 0 0 / 0.35);
+        --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.70);
+    }
+
+    body.admin-login-page::before {
+        background:
+            linear-gradient(
+                150deg,
+                #1e1b4b 0%,
+                #252160 45%,
+                #0f0d2e 100%
+            );
+    }
+
+    body.admin-login-page::after {
+        opacity: 0.55;
+    }
+
+    .admin-login-card {
+        background-color: var(--color-bg-elevated);
+        border-color: var(--color-border);
+        box-shadow:
+            var(--shadow-2xl),
+            0 40px 80px -30px rgb(0 0 0 / 0.85);
+    }
+
+    .admin-login-header h1 {
+        color: var(--color-text);
+    }
+
+    .admin-login-school {
+        color: var(--color-brand-300);
+        background-color: rgb(99 102 241 / 0.16);
+        border-color: rgb(99 102 241 / 0.28);
+    }
+
+    .admin-login-school::before {
+        background-color: var(--color-brand-400);
+    }
+
+    .admin-login-description {
+        color: var(--color-text-subtle);
+    }
+
+    .form-field input[type="text"],
+    .form-field input[type="password"],
+    .form-field input[type="email"] {
+        color: var(--color-text);
+        background-color: #0f1830;
+        border-color: var(--color-border-strong);
+    }
+
+    .form-field input:focus {
+        background-color: #131c31;
+    }
+
+    .form-field input:invalid:not(:placeholder-shown):not(:focus) {
+        background-color: rgb(127 29 29 / 0.20);
+    }
+
+    .admin-alert-error {
+        color: #fecaca;
+        background-color: rgb(127 29 29 / 0.28);
+        border-color: rgb(220 38 38 / 0.35);
+    }
+
+    .admin-alert-warning {
+        color: #fde68a;
+        background-color: rgb(120 53 15 / 0.28);
+        border-color: rgb(217 119 6 / 0.35);
+    }
+
+    .admin-alert-success {
+        color: #bbf7d0;
+        background-color: rgb(20 83 45 / 0.28);
+        border-color: rgb(22 163 74 / 0.40);
+    }
+
+    .button-secondary {
+        color: var(--color-brand-300);
+        background-color: transparent;
+        border-color: var(--color-border-strong);
+    }
+
+    .button-secondary:hover {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.14);
+        border-color: rgb(99 102 241 / 0.45);
+    }
+
+    .admin-login-footer {
+        border-top-color: var(--color-border-subtle);
+    }
+
+    .admin-login-footer a:hover {
+        color: var(--color-brand-300);
+        background-color: rgb(99 102 241 / 0.14);
+    }
+}
+
+
+/* ==========================================================================
+   17. REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+
+    .admin-login-card,
+    .admin-alert {
+        animation: none;
+    }
+
+    .button-primary:hover {
+        transform: none;
+    }
+}
+
+
+/* ==========================================================================
+   18. HIGH CONTRAST
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+
+    :root {
+        --color-text-muted: var(--color-neutral-700);
+        --color-text-subtle: var(--color-neutral-700);
+        --color-border: var(--color-neutral-400);
+        --color-border-strong: var(--color-neutral-500);
+    }
+
+    .admin-login-card {
+        border-width: 2px;
+    }
+
+    .form-field input {
+        border-width: 2px;
+    }
+
+    .button {
+        border-width: 2px;
+    }
+
+    .admin-login-footer a:hover {
+        outline: 2px solid currentColor;
+        outline-offset: 2px;
+    }
+}
+
+
+/* ==========================================================================
+   19. FORCED COLORS MODE
+   ========================================================================== */
+
+@media (forced-colors: active) {
+
+    .admin-login-card,
+    .form-field input,
+    .button,
+    .admin-alert {
+        border: 1px solid CanvasText;
+    }
+
+    .button {
+        border-color: ButtonText;
+        color: ButtonText;
+    }
+
+    a:focus-visible,
+    button:focus-visible,
+    input:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+
+    .admin-alert::before {
+        background-color: CanvasText;
+        color: Canvas;
+    }
+}
+
+
+/* ==========================================================================
+   20. PRINT
+   ========================================================================== */
+
+@media print {
+
+    :root {
+        --color-bg: #ffffff;
+        --color-bg-elevated: #ffffff;
+        --color-text: #000000;
+        --color-text-muted: #333333;
+        --color-border: #cccccc;
+    }
+
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    html,
+    body {
+        font-size: 11pt;
+        line-height: 1.4;
+        padding: 0;
+    }
+
+    body.admin-login-page::before,
+    body.admin-login-page::after {
+        display: none !important;
+    }
+
+    body.admin-login-page {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .admin-login-card {
+        max-width: 100%;
+        padding: 12pt;
+        border: 1pt solid #999;
+        border-radius: 0;
+        box-shadow: none;
+        animation: none;
+    }
+
+    .admin-login-card::before {
+        display: none;
+    }
+
+    .admin-login-form .button {
+        display: none;
+    }
+
+    .admin-login-footer {
+        display: none;
+    }
+
+    .form-field input {
+        border: 1pt solid #999;
+        border-radius: 0;
+    }
+}
+
+
+/* ==========================================================================
+   21. SCROLLBAR
+   ========================================================================== */
+
+@supports selector(::-webkit-scrollbar) {
+
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgb(255 255 255 / 0.25);
+        border: 3px solid transparent;
+        background-clip: content-box;
+        border-radius: var(--radius-full);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(255 255 255 / 0.40);
+        background-clip: content-box;
+    }
+}
+
+@supports (scrollbar-color: auto) {
+    html {
+        scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+        scrollbar-width: thin;
+    }
+}
+
+
+/* ==========================================================================
+   22. ANIMATIONS
+   ========================================================================== */
+
+@keyframes login-card-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes login-alert-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes login-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.admin-login-header,
+.admin-login-form,
+.admin-login-footer {
+    animation: login-fade-in var(--duration-500) var(--ease-smooth) both;
+}
+
+.admin-login-header { animation-delay: 120ms; }
+.admin-login-form   { animation-delay: 200ms; }
+.admin-login-footer { animation-delay: 280ms; }
+
+
+/* ==========================================================================
+   23. FINAL OVERRIDES
+   ========================================================================== */
+
+/* Card không vượt quá chiều cao màn hình trên mobile */
+@media (max-height: 640px) {
+    .admin-login-card {
+        gap: var(--space-4);
+        padding: var(--space-6);
+    }
+
+    .admin-login-header {
+        gap: var(--space-1);
+    }
+}
+
+/* Đảm bảo input không bị co trong flex */
+.form-field input {
+    min-width: 0;
+}
+
+/* Nút submit không bị wrap text */
+.admin-login-submit {
+    white-space: nowrap;
+}
+
+/* Focus ring rõ ràng cho input */
+.form-field input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgb(99 102 241 / 0.28);
+}
+
+/* Card luôn căn giữa theo chiều ngang */
+.admin-login {
+    justify-content: center;
+}
+
+/* Alert không bị tràn text dài */
+.admin-alert {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Không cho phép zoom text gây vỡ layout trên mobile */
+.admin-login-header h1,
+.admin-login-school {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Ẩn autofill background của Chrome (giữ layout sạch) */
+.form-field input:-webkit-autofill,
+.form-field input:-webkit-autofill:hover,
+.form-field input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color-text);
+    -webkit-box-shadow: 0 0 0 1000px var(--color-neutral-0) inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+@media (prefers-color-scheme: dark) {
+    .form-field input:-webkit-autofill,
+    .form-field input:-webkit-autofill:hover,
+    .form-field input:-webkit-autofill:focus {
+        -webkit-text-fill-color: var(--color-text);
+        -webkit-box-shadow: 0 0 0 1000px #0f1830 inset;
+    }
+}
+
+/* Tránh FOUC cho autofill */
+.form-field input:autofill {
+    background-color: var(--color-neutral-0);
+}
+
+
+/* ==========================================================================
+   KẾT THÚC LOGIN.CSS
+   ========================================================================== */
