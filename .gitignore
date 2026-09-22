@@ -1,0 +1,33 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# User / application data
+data/
+storage/
+uploads/
+backups/
+cache/
+logs/
+
+# Publication files
+*.pdf
+*.zip
+*.rar
+*.7z
+
+# Database / exports
+*.sql
+*.sqlite
+*.db
+*.bak
+
+# Local/server config
+config.local.php
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

@@ -11,7 +11,6 @@ require_admin_role();
 
 $userRepository = new UserRepository();
 $settingsRepository = new SettingsRepository();
-
 $settings = $settingsRepository->all();
 
 $schoolName = (string) ($settings['school']['name'] ?? APP_SCHOOL_NAME);
@@ -20,7 +19,6 @@ $logo = (string) ($settings['school']['logo'] ?? '');
 $favicon = (string) ($settings['platform']['favicon'] ?? '');
 
 $currentUserId = auth_user_id();
-
 $errors = [];
 $success = null;
 $editingUser = null;
@@ -36,15 +34,14 @@ if ($editId !== '') {
 }
 
 if (is_post()) {
-
     try {
-
         require_csrf_token();
-
         $action = post_string('action', '');
 
+        // ============================================================
+        // CREATE USER
+        // ============================================================
         if ($action === 'create') {
-
             $username = trim(post_string('username', ''));
             $displayName = trim(post_string('display_name', ''));
             $email = trim(post_string('email', ''));
@@ -52,6 +49,7 @@ if (is_post()) {
             $role = post_string('role', 'admin');
             $status = post_string('status', 'active');
 
+            // Username
             if ($username === '') {
                 $errors[] = 'Tên đăng nhập không được để trống.';
             } elseif (!preg_match('/^[a-zA-Z0-9._-]{3,50}$/', $username)) {
@@ -60,34 +58,39 @@ if (is_post()) {
                 $errors[] = 'Tên đăng nhập đã tồn tại.';
             }
 
+            // Display name
             if ($displayName === '') {
                 $errors[] = 'Tên hiển thị không được để trống.';
             }
 
-            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Email
+            if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors[] = 'Địa chỉ email không hợp lệ.';
             }
 
+            // Password
             if (mb_strlen($password) < PASSWORD_MIN_LENGTH) {
                 $errors[] = 'Mật khẩu phải có ít nhất ' . PASSWORD_MIN_LENGTH . ' ký tự.';
             }
 
+            // Role
             if (!in_array($role, ['admin'], true)) {
                 $errors[] = 'Vai trò không hợp lệ.';
             }
 
+            // Status
             if (!in_array($status, ['active', 'disabled'], true)) {
                 $errors[] = 'Trạng thái tài khoản không hợp lệ.';
             }
 
+            // Repository tự password_hash().
             if ($errors === []) {
-
                 $now = now_datetime();
 
                 $userRepository->create([
                     'id' => 'usr_' . bin2hex(random_bytes(8)),
                     'username' => $username,
-                    'password_hash' => password_hash($password, PASSWORD_DEFAULT),
+                    'password' => $password,
                     'display_name' => $displayName,
                     'email' => $email,
                     'role' => $role,
@@ -101,10 +104,17 @@ if (is_post()) {
             }
         }
 
+        // ============================================================
+        // UPDATE USER
+        // ============================================================
         if ($action === 'update') {
-
             $userId = post_string('user_id', '');
-            $user = $userRepository->findById($userId);
+
+            if ($userId === '') {
+                $errors[] = 'ID tài khoản không hợp lệ.';
+            }
+
+            $user = $userId !== '' ? $userRepository->findById($userId) : null;
 
             if ($user === null) {
                 abort_not_found('Không tìm thấy tài khoản.');
@@ -120,7 +130,7 @@ if (is_post()) {
                 $errors[] = 'Tên hiển thị không được để trống.';
             }
 
-            if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
                 $errors[] = 'Địa chỉ email không hợp lệ.';
             }
 
@@ -136,28 +146,23 @@ if (is_post()) {
                 $errors[] = 'Mật khẩu mới phải có ít nhất ' . PASSWORD_MIN_LENGTH . ' ký tự.';
             }
 
-            /*
-             * Không cho tự khóa tài khoản đang đăng nhập.
-             * Nếu cần vô hiệu hóa tài khoản này, nên thực hiện từ một
-             * tài khoản quản trị khác.
-             */
             if ($userId === $currentUserId && $status !== 'active') {
                 $errors[] = 'Không thể vô hiệu hóa tài khoản quản trị đang đăng nhập.';
             }
 
             if ($errors === []) {
+                // update(string $id, array $data)
+                $userRepository->update($userId, [
+                    'display_name' => $displayName,
+                    'email' => $email,
+                    'role' => $role,
+                    'status' => $status,
+                    'updated_at' => now_datetime(),
+                ]);
 
-                $updated = $user;
-                $updated['display_name'] = $displayName;
-                $updated['email'] = $email;
-                $updated['role'] = $role;
-                $updated['status'] = $status;
-                $updated['updated_at'] = now_datetime();
-
-                $userRepository->update($updated);
-
+                // updatePassword() tự hash.
                 if ($password !== '') {
-                    $userRepository->updatePassword($userId, password_hash($password, PASSWORD_DEFAULT));
+                    $userRepository->updatePassword($userId, $password);
                 }
 
                 redirect(app_url('admin/users.php?updated=1'));
@@ -166,62 +171,57 @@ if (is_post()) {
             $editingUser = $user;
         }
 
+        // ============================================================
+        // TOGGLE STATUS
+        // ============================================================
         if ($action === 'toggle_status') {
-
             $userId = post_string('user_id', '');
 
-            if ($userId === $currentUserId) {
-
+            if ($userId === '') {
+                $errors[] = 'ID tài khoản không hợp lệ.';
+            } elseif ($userId === $currentUserId) {
                 $errors[] = 'Không thể khóa tài khoản quản trị đang đăng nhập.';
-
             } else {
-
                 $user = $userRepository->findById($userId);
 
                 if ($user === null) {
                     abort_not_found('Không tìm thấy tài khoản.');
                 }
 
-                $newStatus = ($user['status'] ?? 'active') === 'active' ? 'disabled' : 'active';
+                $currentStatus = (string) ($user['status'] ?? 'active');
+                $newStatus = $currentStatus === 'active' ? 'disabled' : 'active';
 
-                $user['status'] = $newStatus;
-                $user['updated_at'] = now_datetime();
-
-                $userRepository->update($user);
+                $userRepository->update($userId, [
+                    'status' => $newStatus,
+                    'updated_at' => now_datetime(),
+                ]);
 
                 redirect(app_url('admin/users.php?status_changed=1'));
             }
         }
-
     } catch (ValidationException $exception) {
-
         $errors = array_merge($errors, $exception->errors());
     }
 }
 
+// Flash / query state
 $created = get_string('created', '') === '1';
 $updated = get_string('updated', '') === '1';
 $statusChanged = get_string('status_changed', '') === '1';
 
+// Load users
 $users = $userRepository->all();
 
 usort($users, static function (array $a, array $b): int {
     return strcmp((string) ($a['username'] ?? ''), (string) ($b['username'] ?? ''));
 });
 
+// Page variables
 $csrfField = csrf_field();
 $pageTitle = 'Quản lý tài khoản';
-
 $showCreateForm = get_string('create', '') === '1' || ($editingUser === null && $errors !== []);
 
-/*
- * ------------------------------------------------------------
- * Asset URLs
- *
- * CSS/JS được đặt trong: admin/assets/
- * ------------------------------------------------------------
- */
-
+// Asset URLs
 $faviconUrl = $favicon !== '' ? app_url($favicon) : app_url('assets/favicon.ico');
 $logoUrl = $logo !== '' ? app_url($logo) : app_url('assets/logo.webp');
 $stylesheetUrl = app_url('admin/assets/css/users.css');
@@ -229,6 +229,7 @@ $scriptUrl = app_url('assets/js/admin.js');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -237,11 +238,13 @@ $scriptUrl = app_url('assets/js/admin.js');
     <link rel="icon" href="<?= e($faviconUrl) ?>">
     <link rel="stylesheet" href="<?= e($stylesheetUrl) ?>">
 </head>
+
 <body class="admin-page">
 
 <header class="admin-header">
     <div class="admin-header__inner">
 
+        <!-- BRAND -->
         <div class="admin-brand">
             <a href="<?= e(app_url('admin/index.php')) ?>" class="admin-brand__link" aria-label="<?= e($schoolName) ?>">
                 <img class="admin-brand__logo" src="<?= e($logoUrl) ?>" alt="<?= e($schoolName) ?>">
@@ -252,6 +255,7 @@ $scriptUrl = app_url('assets/js/admin.js');
             </a>
         </div>
 
+        <!-- NAVIGATION -->
         <nav class="admin-nav" aria-label="Quản trị">
             <a href="<?= e(app_url('admin/index.php')) ?>">Tổng quan</a>
             <a href="<?= e(app_url('admin/publications.php')) ?>">Ấn phẩm</a>
@@ -259,6 +263,7 @@ $scriptUrl = app_url('assets/js/admin.js');
             <a href="<?= e(app_url('admin/settings.php')) ?>">Cài đặt</a>
         </nav>
 
+        <!-- LOGOUT -->
         <form method="post" action="<?= e(app_url('admin/logout.php')) ?>" class="admin-logout-form">
             <?= $csrfField ?>
             <button type="submit">Đăng xuất</button>
@@ -270,6 +275,7 @@ $scriptUrl = app_url('assets/js/admin.js');
 <main class="admin-main">
     <div class="admin-container">
 
+        <!-- PAGE HEADING -->
         <div class="admin-page-heading">
             <div>
                 <p class="admin-eyebrow">Quản trị hệ thống</p>
@@ -278,12 +284,17 @@ $scriptUrl = app_url('assets/js/admin.js');
             </div>
 
             <?php if ($editingUser === null): ?>
-                <a href="<?= e(app_url('admin/users.php?create=1')) ?>" class="admin-button admin-button--primary">+ Thêm tài khoản</a>
+                <a href="<?= e(app_url('admin/users.php?create=1')) ?>" class="admin-button admin-button--primary">
+                    + Thêm tài khoản
+                </a>
             <?php else: ?>
-                <a href="<?= e(app_url('admin/users.php')) ?>" class="admin-button">Hủy chỉnh sửa</a>
+                <a href="<?= e(app_url('admin/users.php')) ?>" class="admin-button">
+                    Hủy chỉnh sửa
+                </a>
             <?php endif; ?>
         </div>
 
+        <!-- FLASH MESSAGES -->
         <?php if ($created): ?>
             <div class="admin-alert admin-alert--success">Đã tạo tài khoản thành công.</div>
         <?php endif; ?>
@@ -296,6 +307,7 @@ $scriptUrl = app_url('assets/js/admin.js');
             <div class="admin-alert admin-alert--success">Đã cập nhật trạng thái tài khoản.</div>
         <?php endif; ?>
 
+        <!-- ERRORS -->
         <?php if ($errors !== []): ?>
             <div class="admin-alert admin-alert--error">
                 <strong>Không thể hoàn tất thao tác:</strong>
@@ -307,9 +319,13 @@ $scriptUrl = app_url('assets/js/admin.js');
             </div>
         <?php endif; ?>
 
+        <!-- ========================================================
+             EDIT USER FORM
+             ======================================================== -->
         <?php if ($editingUser !== null): ?>
 
             <section class="admin-card">
+
                 <div class="admin-card__header">
                     <div>
                         <h2>Chỉnh sửa tài khoản</h2>
@@ -318,8 +334,8 @@ $scriptUrl = app_url('assets/js/admin.js');
                 </div>
 
                 <form method="post" action="<?= e(app_url('admin/users.php')) ?>" class="admin-form" autocomplete="off">
-
                     <?= $csrfField ?>
+
                     <input type="hidden" name="action" value="update">
                     <input type="hidden" name="user_id" value="<?= e($editingUser['id'] ?? '') ?>">
 
@@ -333,12 +349,14 @@ $scriptUrl = app_url('assets/js/admin.js');
 
                         <div class="admin-form-field">
                             <label for="display_name">Tên hiển thị</label>
-                            <input id="display_name" name="display_name" type="text" maxlength="120" required value="<?= e($editingUser['display_name'] ?? '') ?>">
+                            <input id="display_name" name="display_name" type="text" maxlength="120" required
+                                   value="<?= e($editingUser['display_name'] ?? '') ?>">
                         </div>
 
                         <div class="admin-form-field">
                             <label for="email">Email</label>
-                            <input id="email" name="email" type="email" maxlength="190" value="<?= e($editingUser['email'] ?? '') ?>">
+                            <input id="email" name="email" type="email" maxlength="190"
+                                   value="<?= e($editingUser['email'] ?? '') ?>">
                         </div>
 
                         <div class="admin-form-field">
@@ -358,7 +376,9 @@ $scriptUrl = app_url('assets/js/admin.js');
 
                         <div class="admin-form-field">
                             <label for="password">Mật khẩu mới</label>
-                            <input id="password" name="password" type="password" minlength="<?= e((string) PASSWORD_MIN_LENGTH) ?>" autocomplete="new-password">
+                            <input id="password" name="password" type="password"
+                                   minlength="<?= e((string) PASSWORD_MIN_LENGTH) ?>"
+                                   autocomplete="new-password">
                             <small>Để trống nếu không muốn đổi mật khẩu. Tối thiểu <?= e((string) PASSWORD_MIN_LENGTH) ?> ký tự.</small>
                         </div>
 
@@ -368,13 +388,17 @@ $scriptUrl = app_url('assets/js/admin.js');
                         <button type="submit" class="admin-button admin-button--primary">Lưu thay đổi</button>
                         <a href="<?= e(app_url('admin/users.php')) ?>" class="admin-button">Hủy</a>
                     </div>
-
                 </form>
+
             </section>
 
+        <!-- ========================================================
+             CREATE USER FORM
+             ======================================================== -->
         <?php elseif ($showCreateForm): ?>
 
             <section class="admin-card">
+
                 <div class="admin-card__header">
                     <div>
                         <h2>Thêm tài khoản</h2>
@@ -383,15 +407,16 @@ $scriptUrl = app_url('assets/js/admin.js');
                 </div>
 
                 <form method="post" action="<?= e(app_url('admin/users.php')) ?>" class="admin-form" autocomplete="off">
-
                     <?= $csrfField ?>
+
                     <input type="hidden" name="action" value="create">
 
                     <div class="admin-form-grid">
 
                         <div class="admin-form-field">
                             <label for="username">Tên đăng nhập</label>
-                            <input id="username" name="username" type="text" minlength="3" maxlength="50" required autocomplete="username">
+                            <input id="username" name="username" type="text" minlength="3" maxlength="50"
+                                   required autocomplete="username">
                             <small>3–50 ký tự: chữ cái, số, ., _, -.</small>
                         </div>
 
@@ -407,7 +432,9 @@ $scriptUrl = app_url('assets/js/admin.js');
 
                         <div class="admin-form-field">
                             <label for="password">Mật khẩu</label>
-                            <input id="password" name="password" type="password" minlength="<?= e((string) PASSWORD_MIN_LENGTH) ?>" required autocomplete="new-password">
+                            <input id="password" name="password" type="password"
+                                   minlength="<?= e((string) PASSWORD_MIN_LENGTH) ?>"
+                                   required autocomplete="new-password">
                             <small>Tối thiểu <?= e((string) PASSWORD_MIN_LENGTH) ?> ký tự.</small>
                         </div>
 
@@ -432,13 +459,17 @@ $scriptUrl = app_url('assets/js/admin.js');
                         <button type="submit" class="admin-button admin-button--primary">Tạo tài khoản</button>
                         <a href="<?= e(app_url('admin/users.php')) ?>" class="admin-button">Hủy</a>
                     </div>
-
                 </form>
+
             </section>
 
         <?php endif; ?>
 
+        <!-- ========================================================
+             USER LIST
+             ======================================================== -->
         <section class="admin-card">
+
             <div class="admin-card__header">
                 <div>
                     <h2>Danh sách tài khoản</h2>
@@ -457,6 +488,7 @@ $scriptUrl = app_url('assets/js/admin.js');
 
                 <div class="admin-table-wrap">
                     <table class="admin-table">
+
                         <thead>
                             <tr>
                                 <th>Tài khoản</th>
@@ -476,10 +508,14 @@ $scriptUrl = app_url('assets/js/admin.js');
                             $isCurrentUser = $userId === $currentUserId;
 
                             $editUserUrl = app_url('admin/users.php?edit=' . rawurlencode($userId));
-                            $toggleConfirm = $userStatus === 'active' ? 'Khóa tài khoản này?' : 'Mở khóa tài khoản này?';
+
+                            $toggleConfirm = $userStatus === 'active'
+                                ? 'Khóa tài khoản này?'
+                                : 'Mở khóa tài khoản này?';
                             ?>
 
                             <tr>
+                                <!-- ACCOUNT -->
                                 <td>
                                     <strong><?= e($user['display_name'] ?? '') ?></strong>
                                     <div>@<?= e($user['username'] ?? '') ?></div>
@@ -493,8 +529,10 @@ $scriptUrl = app_url('assets/js/admin.js');
                                     <?php endif; ?>
                                 </td>
 
+                                <!-- ROLE -->
                                 <td>Quản trị viên</td>
 
+                                <!-- STATUS -->
                                 <td>
                                     <?php if ($userStatus === 'active'): ?>
                                         <span class="admin-badge admin-badge--success">Hoạt động</span>
@@ -503,6 +541,7 @@ $scriptUrl = app_url('assets/js/admin.js');
                                     <?php endif; ?>
                                 </td>
 
+                                <!-- LAST LOGIN -->
                                 <td>
                                     <?php if (($user['last_login_at'] ?? '') !== ''): ?>
                                         <?= e(format_datetime($user['last_login_at'])) ?>
@@ -511,8 +550,10 @@ $scriptUrl = app_url('assets/js/admin.js');
                                     <?php endif; ?>
                                 </td>
 
+                                <!-- UPDATED -->
                                 <td><?= e(format_datetime($user['updated_at'] ?? '')) ?></td>
 
+                                <!-- ACTIONS -->
                                 <td>
                                     <div class="admin-table-actions">
 
@@ -520,15 +561,16 @@ $scriptUrl = app_url('assets/js/admin.js');
 
                                         <?php if (!$isCurrentUser): ?>
                                             <form method="post" action="<?= e(app_url('admin/users.php')) ?>">
-
                                                 <?= $csrfField ?>
+
                                                 <input type="hidden" name="action" value="toggle_status">
                                                 <input type="hidden" name="user_id" value="<?= e($userId) ?>">
 
-                                                <button type="submit" class="admin-button admin-button--small" data-confirm="<?= e($toggleConfirm) ?>">
+                                                <button type="submit"
+                                                        class="admin-button admin-button--small"
+                                                        data-confirm="<?= e($toggleConfirm) ?>">
                                                     <?= $userStatus === 'active' ? 'Khóa' : 'Mở khóa' ?>
                                                 </button>
-
                                             </form>
                                         <?php endif; ?>
 
@@ -537,16 +579,20 @@ $scriptUrl = app_url('assets/js/admin.js');
                             </tr>
                         <?php endforeach; ?>
                         </tbody>
+
                     </table>
                 </div>
 
             <?php endif; ?>
+
         </section>
 
+        <!-- SECURITY NOTE -->
         <section class="admin-note">
             <strong>Lưu ý bảo mật:</strong>
             mật khẩu được lưu bằng <code>password_hash()</code>;
-            giao diện này không đọc hoặc hiển thị mật khẩu hay <code>password_hash</code> của tài khoản.
+            giao diện này không đọc hoặc hiển thị mật khẩu
+            hay <code>password_hash</code> của tài khoản.
         </section>
 
     </div>

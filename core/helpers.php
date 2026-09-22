@@ -52,25 +52,39 @@ function app_url(string $path = ''): string
         );
 
         $scheme = $https ? 'https' : 'http';
-
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
         $baseUrl = $scheme . '://' . $host;
 
-        /*
-         * Detect installation inside a subdirectory.
-         *
-         * Example:
-         * https://example.com/thd-digital-publishing
-         */
-        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
-
-        $projectDirectory = dirname(
-            dirname($scriptName)
+        $documentRoot = realpath(
+            $_SERVER['DOCUMENT_ROOT'] ?? ''
         );
 
-        if ($projectDirectory !== '/' && $projectDirectory !== '\\') {
-            $baseUrl .= rtrim($projectDirectory, '/\\');
+        $projectRoot = realpath(THD_ROOT);
+
+        if (
+            $documentRoot !== false
+            && $projectRoot !== false
+            && (
+                $projectRoot === $documentRoot
+                || str_starts_with(
+                    $projectRoot,
+                    $documentRoot . DIRECTORY_SEPARATOR
+                )
+            )
+        ) {
+            $relativePath = substr(
+                $projectRoot,
+                strlen($documentRoot)
+            );
+
+            $relativePath = str_replace(
+                DIRECTORY_SEPARATOR,
+                '/',
+                $relativePath
+            );
+
+            $baseUrl .= rtrim($relativePath, '/');
         }
     }
 
