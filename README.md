@@ -93,6 +93,8 @@ Một số thành phần có thể thay đổi khi tiếp tục phát triển ho
 ## 👤 Author
 
 **TLN Minh**
+**PV Thanh**
+**DVM Đức**
 
 THPT A Trần Hưng Đạo
 
