@@ -1,0 +1,1393 @@
+/* ==========================================================================
+   THD ADMIN — LOGOUT / ERROR PAGES
+   File: admin/assets/css/logout.css
+   --------------------------------------------------------------------------
+   Stylesheet cho các trang thông báo của admin/logout.php:
+     - 405 Method Not Allowed
+     - 422 Invalid session (CSRF)
+
+   Đây là trang tối giản: chỉ có <h1>, <p>, <a> trong <body>.
+   CSS này giúp 2 trang đó hiển thị đẹp, đồng bộ với hệ admin THD.
+
+   LƯU Ý: file logout.php chưa có <link rel="stylesheet">.
+   Cần thêm vào <head> của cả 2 khối HTML:
+     <link rel="stylesheet" href="<?= e(app_url('admin/assets/css/logout.css')) ?>">
+
+   Mục lục:
+     01. Design tokens
+     02. Reset & normalize
+     03. Base
+     04. Typography
+     05. Accessibility
+     06. Layout — centered page
+     07. Card container (auto-wrap body children)
+     08. Heading
+     09. Paragraph
+     10. Links
+     11. Utilities
+     12. Responsive
+     13. Dark mode
+     14. Reduced motion
+     15. High contrast
+     16. Forced colors
+     17. Print
+     18. Scrollbar
+     19. Animations
+     20. Final overrides
+   ========================================================================== */
+
+
+/* ==========================================================================
+   01. DESIGN TOKENS
+   ========================================================================== */
+
+:root {
+
+    /* Brand palette */
+    --color-brand-50:  #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-200: #c7d2fe;
+    --color-brand-300: #a5b4fc;
+    --color-brand-400: #818cf8;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+    --color-brand-800: #3730a3;
+    --color-brand-900: #312e81;
+    --color-brand-950: #1e1b4b;
+
+    /* Accent */
+    --color-accent-100: #fef3c7;
+    --color-accent-200: #fde68a;
+    --color-accent-300: #fcd34d;
+    --color-accent-400: #fbbf24;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+
+    /* Neutral */
+    --color-neutral-0:   #ffffff;
+    --color-neutral-50:  #f8fafc;
+    --color-neutral-100: #f1f5f9;
+    --color-neutral-200: #e2e8f0;
+    --color-neutral-300: #cbd5e1;
+    --color-neutral-400: #94a3b8;
+    --color-neutral-500: #64748b;
+    --color-neutral-600: #475569;
+    --color-neutral-700: #334155;
+    --color-neutral-800: #1e293b;
+    --color-neutral-900: #0f172a;
+    --color-neutral-950: #020617;
+
+    /* Semantic */
+    --color-success-50:  #f0fdf4;
+    --color-success-200: #bbf7d0;
+    --color-success-600: #16a34a;
+    --color-success-700: #15803d;
+
+    --color-warning-50:  #fffbeb;
+    --color-warning-200: #fde68a;
+    --color-warning-600: #d97706;
+    --color-warning-800: #92400e;
+
+    --color-danger-50:  #fef2f2;
+    --color-danger-100: #fee2e2;
+    --color-danger-200: #fecaca;
+    --color-danger-400: #f87171;
+    --color-danger-500: #ef4444;
+    --color-danger-600: #dc2626;
+    --color-danger-700: #b91c1c;
+    --color-danger-800: #991b1b;
+    --color-danger-900: #7f1d1d;
+
+    --color-info-50:  #eff6ff;
+    --color-info-200: #bfdbfe;
+    --color-info-600: #2563eb;
+    --color-info-800: #1e40af;
+
+    /* Surface & text */
+    --color-bg:              var(--color-neutral-50);
+    --color-bg-elevated:     var(--color-neutral-0);
+    --color-bg-subtle:       var(--color-neutral-100);
+
+    --color-text:            var(--color-neutral-900);
+    --color-text-muted:      var(--color-neutral-600);
+    --color-text-subtle:     var(--color-neutral-500);
+
+    --color-border:          var(--color-neutral-200);
+    --color-border-strong:   var(--color-neutral-300);
+    --color-border-subtle:   var(--color-neutral-100);
+
+    --color-ring:            var(--color-brand-500);
+
+    /* Typography */
+    --font-sans:
+        "Be Vietnam Pro", "Inter", -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
+        sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+
+    --font-mono:
+        "JetBrains Mono", "SFMono-Regular", Consolas,
+        "Liberation Mono", Menlo, monospace;
+
+    --font-size-xs:  0.75rem;
+    --font-size-sm:  0.875rem;
+    --font-size-md:  1rem;
+    --font-size-lg:  1.125rem;
+    --font-size-xl:  1.25rem;
+    --font-size-2xl: 1.5rem;
+    --font-size-3xl: 1.875rem;
+    --font-size-4xl: 2.25rem;
+
+    --font-weight-regular:   400;
+    --font-weight-medium:    500;
+    --font-weight-semibold:  600;
+    --font-weight-bold:      700;
+    --font-weight-extrabold: 800;
+
+    --line-height-none:    1;
+    --line-height-tight:   1.15;
+    --line-height-snug:    1.3;
+    --line-height-normal:  1.5;
+    --line-height-relaxed: 1.65;
+
+    --letter-spacing-tighter: -0.04em;
+    --letter-spacing-tight:   -0.02em;
+    --letter-spacing-wide:    0.02em;
+    --letter-spacing-wider:   0.05em;
+    --letter-spacing-widest:  0.12em;
+
+    /* Spacing */
+    --space-1:   0.25rem;
+    --space-1-5: 0.375rem;
+    --space-2:   0.5rem;
+    --space-2-5: 0.625rem;
+    --space-3:   0.75rem;
+    --space-3-5: 0.875rem;
+    --space-4:   1rem;
+    --space-5:   1.25rem;
+    --space-6:   1.5rem;
+    --space-7:   1.75rem;
+    --space-8:   2rem;
+    --space-10:  2.5rem;
+    --space-12:  3rem;
+    --space-14:  3.5rem;
+    --space-16:  4rem;
+    --space-20:  5rem;
+
+    /* Radius */
+    --radius-sm:   0.25rem;
+    --radius-md:   0.375rem;
+    --radius-lg:   0.5rem;
+    --radius-xl:   0.75rem;
+    --radius-2xl:  1rem;
+    --radius-3xl:  1.5rem;
+    --radius-full: 9999px;
+
+    /* Shadows */
+    --shadow-xs: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+    --shadow-sm: 0 1px 3px 0 rgb(15 23 42 / 0.08), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+    --shadow-md: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+    --shadow-lg: 0 10px 15px -3px rgb(15 23 42 / 0.08), 0 4px 6px -4px rgb(15 23 42 / 0.05);
+    --shadow-xl: 0 20px 25px -5px rgb(15 23 42 / 0.10), 0 8px 10px -6px rgb(15 23 42 / 0.06);
+    --shadow-2xl: 0 25px 50px -12px rgb(15 23 42 / 0.25);
+    --shadow-brand: 0 10px 24px -8px rgb(79 70 229 / 0.45);
+
+    /* Motion */
+    --ease-out:    cubic-bezier(0, 0, 0.2, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+
+    --duration-150: 150ms;
+    --duration-200: 200ms;
+    --duration-300: 300ms;
+    --duration-500: 500ms;
+
+    --transition-fast: var(--duration-150) var(--ease-out);
+    --transition-base: var(--duration-200) var(--ease-out);
+    --transition-slow: var(--duration-300) var(--ease-out);
+
+    /* Layout */
+    --container-max:     480px;
+    --container-padding: var(--space-4);
+    --card-padding:      var(--space-8);
+
+    --z-base: 1;
+}
+
+
+@media (min-width: 640px) {
+    :root {
+        --container-padding: var(--space-6);
+        --card-padding:      var(--space-10);
+    }
+}
+
+
+/* ==========================================================================
+   02. RESET & NORMALIZE
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+    height: 100%;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+input,
+button,
+textarea,
+select {
+    font: inherit;
+    color: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+}
+
+button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+ul,
+ol {
+    list-style: none;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--color-border);
+    margin: var(--space-6) 0;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+::selection {
+    background-color: var(--color-brand-200);
+    color: var(--color-brand-950);
+}
+
+
+/* ==========================================================================
+   03. BASE
+   ========================================================================== */
+
+html {
+    font-size: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    padding: var(--space-8) var(--container-padding);
+
+    font-family: var(--font-sans);
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-regular);
+    line-height: var(--line-height-relaxed);
+    letter-spacing: 0;
+
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    overflow-x: hidden;
+    position: relative;
+
+    text-align: center;
+}
+
+/* Nền trang — gradient nhẹ + hoa văn */
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            160deg,
+            var(--color-brand-800) 0%,
+            var(--color-brand-700) 45%,
+            var(--color-brand-900) 100%
+        );
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image:
+        radial-gradient(
+            circle at 18% 22%,
+            rgb(255 255 255 / 0.14) 0,
+            transparent 42%
+        ),
+        radial-gradient(
+            circle at 82% 78%,
+            rgb(251 191 36 / 0.20) 0,
+            transparent 48%
+        ),
+        linear-gradient(
+            rgb(255 255 255 / 0.05) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgb(255 255 255 / 0.05) 1px,
+            transparent 1px
+        );
+
+    background-size:
+        auto,
+        auto,
+        56px 56px,
+        56px 56px;
+
+    opacity: 0.85;
+}
+
+
+/* ==========================================================================
+   04. TYPOGRAPHY
+   ========================================================================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-sans);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+p {
+    line-height: var(--line-height-relaxed);
+    text-wrap: pretty;
+}
+
+strong,
+b {
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+small {
+    font-size: var(--font-size-sm);
+}
+
+code,
+kbd,
+samp {
+    font-family: var(--font-mono);
+    font-size: 0.875em;
+}
+
+
+/* ==========================================================================
+   05. ACCESSIBILITY
+   ========================================================================== */
+
+.visually-hidden,
+.sr-only {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+a:focus-visible,
+button:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+}
+
+
+/* ==========================================================================
+   06. LAYOUT — CENTERED PAGE
+   ========================================================================== */
+
+/*
+ * Vì HTML của logout.php không có container bọc ngoài,
+ * ta dùng body làm khung căn giữa, và tạo "card" ảo
+ * bằng cách style trực tiếp các phần tử con.
+ */
+
+
+/* ==========================================================================
+   07. CARD CONTAINER (AUTO-WRAP BODY CHILDREN)
+   ========================================================================== */
+
+/*
+ * Giới hạn chiều rộng của nội dung.
+ * Không dùng :has() hay wrapper vì PHP output đơn giản.
+ */
+
+body > h1,
+body > p,
+body > a {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+}
+
+/* --------------------------------------------------------------------------
+   07.1. Tạo hiệu ứng "card" bằng cách gom nhóm thị giác
+   -------------------------------------------------------------------------- */
+
+/*
+ * Cách tiếp cận: dùng padding lớn cho body, và style từng phần tử
+ * để tạo cảm giác đây là một khối thống nhất.
+ *
+ * Nếu sau này bạn bọc nội dung trong <main class="error-card">,
+ * có thể bỏ qua các override dưới và dùng .error-card trực tiếp.
+ */
+
+
+/* ==========================================================================
+   08. HEADING
+   ========================================================================== */
+
+body > h1 {
+    margin: 0 0 var(--space-4);
+
+    padding: var(--space-6) var(--space-6) 0;
+
+    font-size: clamp(1.5rem, 1.3rem + 1.4vw, var(--font-size-3xl));
+    font-weight: var(--font-weight-extrabold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tighter);
+
+    color: var(--color-neutral-0);
+
+    text-wrap: balance;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    /* Nền card giả */
+    background-color: rgb(255 255 255 / 0.08);
+
+    border-top-left-radius: var(--radius-3xl);
+    border-top-right-radius: var(--radius-3xl);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+/* --------------------------------------------------------------------------
+   08.1. Dấu hiệu trạng thái qua nội dung heading
+   -------------------------------------------------------------------------- */
+
+/*
+ * 405 - Phương thức không được phép → vàng
+ * 422 - Phiên không hợp lệ → đỏ
+ * 200 (đăng xuất thành công — nếu PHP redirect không chạy) → xanh
+ *
+ * Dùng :has() để đổi màu heading theo nội dung.
+ */
+
+/* body:has(> h1) > h1 {
+    /* mặc định — trắng */
+/* } */ */
+
+/* 405 → vàng cảnh báo */
+body:has(> h1:contains("405")) > h1 {
+    color: var(--color-accent-200);
+}
+
+/* 422 → đỏ lỗi */
+body:has(> h1:contains("422")) > h1 {
+    color: #fecaca;
+}
+
+/* Nếu trình duyệt không hỗ trợ :contains(), fallback về màu mặc định. */
+
+
+/* ==========================================================================
+   09. PARAGRAPH
+   ========================================================================== */
+
+body > p {
+    margin: 0 0 var(--space-3);
+
+    padding: 0 var(--space-6);
+
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+
+    color: rgb(255 255 255 / 0.82);
+
+    text-wrap: pretty;
+
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+
+    /* Nền card giả */
+    background-color: rgb(255 255 255 / 0.08);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+body > p:last-of-type {
+    margin-bottom: 0;
+
+    padding-bottom: var(--space-6);
+
+    border-bottom-left-radius: var(--radius-3xl);
+    border-bottom-right-radius: var(--radius-3xl);
+
+    box-shadow:
+        0 20px 25px -5px rgb(15 23 42 / 0.10),
+        0 8px 10px -6px rgb(15 23 42 / 0.06),
+        0 25px 50px -12px rgb(0 0 0 / 0.40);
+}
+
+/* Paragraph đầu tiên chứa link → tách phần cuối */
+body > p:has(> a) {
+    padding-bottom: var(--space-6);
+    border-bottom-left-radius: var(--radius-3xl);
+    border-bottom-right-radius: var(--radius-3xl);
+}
+
+/* Paragraph mô tả (không chứa link) giữ nguyên */
+body > p:not(:has(> a)) + p:not(:has(> a)) {
+    margin-top: 0;
+}
+
+
+/* ==========================================================================
+   10. LINKS
+   ========================================================================== */
+
+body > a,
+body > p > a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+
+    padding: var(--space-2-5) var(--space-5);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wide);
+
+    text-decoration: none;
+    white-space: nowrap;
+
+    border-radius: var(--radius-xl);
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-base),
+        background-color var(--transition-base),
+        border-color var(--transition-base),
+        color var(--transition-base);
+}
+
+/* Link trong đoạn văn (không phải link rời) — style như button */
+
+body > p > a {
+    margin-top: var(--space-2);
+
+    color: var(--color-brand-900);
+    background-color: var(--color-neutral-0);
+
+    border: 1px solid var(--color-neutral-0);
+
+    box-shadow:
+        0 4px 6px -1px rgb(15 23 42 / 0.10),
+        0 2px 4px -2px rgb(15 23 42 / 0.06);
+}
+
+body > p > a:hover {
+    color: var(--color-brand-900);
+    background-color: var(--color-accent-100);
+    border-color: var(--color-accent-200);
+
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+body > p > a:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+body > p > a::before {
+    content: "←";
+    font-size: 1.05em;
+    line-height: 1;
+    margin-right: 2px;
+    transition: transform var(--transition-base);
+}
+
+body > p > a:hover::before {
+    transform: translateX(-3px);
+}
+
+/* Link rời (nếu có) — style như button secondary */
+
+body > a {
+    margin-top: var(--space-4);
+
+    color: var(--color-neutral-0);
+    background-color: rgb(255 255 255 / 0.10);
+
+    border: 1px solid rgb(255 255 255 / 0.30);
+
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+body > a:hover {
+    color: var(--color-neutral-0);
+    background-color: rgb(255 255 255 / 0.18);
+    border-color: rgb(255 255 255 / 0.50);
+
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+body > a:active {
+    transform: translateY(0);
+}
+
+
+/* ==========================================================================
+   11. UTILITIES
+   ========================================================================== */
+
+.u-hidden { display: none !important; }
+.u-block { display: block !important; }
+.u-inline-block { display: inline-block !important; }
+.u-flex { display: flex !important; }
+.u-inline-flex { display: inline-flex !important; }
+
+.u-items-center { align-items: center !important; }
+.u-justify-center { justify-content: center !important; }
+.u-text-center { text-align: center !important; }
+
+.u-text-muted { color: rgb(255 255 255 / 0.72) !important; }
+.u-text-brand { color: var(--color-accent-200) !important; }
+
+.u-mt-0 { margin-top: 0 !important; }
+.u-mt-2 { margin-top: var(--space-2) !important; }
+.u-mt-4 { margin-top: var(--space-4) !important; }
+.u-mb-0 { margin-bottom: 0 !important; }
+.u-mb-2 { margin-bottom: var(--space-2) !important; }
+.u-mb-4 { margin-bottom: var(--space-4) !important; }
+
+.u-divider {
+    height: 1px;
+    width: 100%;
+    background-color: rgb(255 255 255 / 0.12);
+    border: none;
+    margin: var(--space-6) 0;
+}
+
+
+/* ==========================================================================
+   12. RESPONSIVE
+   ========================================================================== */
+
+@media (min-width: 480px) {
+    body > h1 {
+        padding-inline: var(--space-8);
+    }
+
+    body > p {
+        padding-inline: var(--space-8);
+    }
+}
+
+@media (min-width: 640px) {
+    body {
+        padding: var(--space-12) var(--container-padding);
+    }
+
+    :root {
+        --container-max: 520px;
+    }
+
+    body > h1 {
+        font-size: var(--font-size-3xl);
+    }
+}
+
+@media (min-width: 1024px) {
+    body {
+        padding: var(--space-16) var(--container-padding);
+    }
+
+    :root {
+        --container-max: 560px;
+    }
+}
+
+@media (max-width: 379px) {
+    :root {
+        --container-padding: var(--space-3);
+        --card-padding:      var(--space-5);
+        --font-size-md:      0.9375rem;
+    }
+
+    body {
+        padding: var(--space-5) var(--container-padding);
+    }
+
+    body > h1 {
+        font-size: var(--font-size-2xl);
+        padding-inline: var(--space-4);
+    }
+
+    body > p {
+        padding-inline: var(--space-4);
+        font-size: var(--font-size-sm);
+    }
+
+    body > p > a {
+        font-size: var(--font-size-xs);
+        padding: var(--space-2) var(--space-4);
+    }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+    body {
+        justify-content: flex-start;
+        padding-block: var(--space-4);
+    }
+
+    body > h1 {
+        font-size: var(--font-size-2xl);
+        padding-block: var(--space-4) 0;
+    }
+}
+
+
+/* ==========================================================================
+   13. DARK MODE
+   ========================================================================== */
+
+/*
+ * Trang này vốn đã tối (gradient brand đậm).
+ * Ở dark mode ta giữ nguyên tông, chỉ tinh chỉnh nhẹ.
+ */
+
+@media (prefers-color-scheme: dark) {
+
+    :root {
+        --color-bg:            #0b1120;
+        --color-bg-elevated:   #131c31;
+        --color-bg-subtle:     #1a2438;
+
+        --color-text:          #e8edf7;
+        --color-text-muted:    #a3b0c7;
+        --color-text-subtle:   #8290a8;
+
+        --color-border:        #253149;
+        --color-border-strong: #33415c;
+        --color-border-subtle: #1c273c;
+
+        --color-ring:          var(--color-brand-400);
+
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.40), 0 2px 4px -2px rgb(0 0 0 / 0.30);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.45), 0 4px 6px -4px rgb(0 0 0 / 0.30);
+    }
+
+    body::before {
+        background:
+            linear-gradient(
+                160deg,
+                #1e1b4b 0%,
+                #252160 45%,
+                #0f0d2e 100%
+            );
+    }
+
+    body::after {
+        opacity: 0.55;
+    }
+
+    body > h1 {
+        background-color: rgb(255 255 255 / 0.06);
+    }
+
+    body > p {
+        background-color: rgb(255 255 255 / 0.06);
+    }
+
+    body > p:last-of-type {
+        box-shadow:
+            0 20px 25px -5px rgb(0 0 0 / 0.40),
+            0 8px 10px -6px rgb(0 0 0 / 0.25),
+            0 25px 50px -12px rgb(0 0 0 / 0.70);
+    }
+
+    body > p > a {
+        color: var(--color-brand-900);
+        background-color: var(--color-neutral-0);
+        border-color: var(--color-neutral-0);
+    }
+
+    body > p > a:hover {
+        color: var(--color-brand-900);
+        background-color: var(--color-accent-100);
+        border-color: var(--color-accent-200);
+    }
+
+    body > a {
+        color: var(--color-neutral-0);
+        background-color: rgb(255 255 255 / 0.08);
+        border-color: rgb(255 255 255 / 0.28);
+    }
+
+    body > a:hover {
+        background-color: rgb(255 255 255 / 0.16);
+        border-color: rgb(255 255 255 / 0.48);
+    }
+
+    ::selection {
+        background-color: var(--color-brand-700);
+        color: var(--color-neutral-0);
+    }
+}
+
+
+/* ==========================================================================
+   14. REDUCED MOTION
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    html {
+        scroll-behavior: auto;
+    }
+
+    body > p > a:hover,
+    body > a:hover {
+        transform: none;
+    }
+
+    body > p > a:hover::before {
+        transform: none;
+    }
+}
+
+
+/* ==========================================================================
+   15. HIGH CONTRAST
+   ========================================================================== */
+
+@media (prefers-contrast: more) {
+
+    body > h1,
+    body > p {
+        background-color: rgb(0 0 0 / 0.35);
+        border: 2px solid CanvasText;
+    }
+
+    body > h1 {
+        border-bottom: none;
+        border-top-left-radius: var(--radius-3xl);
+        border-top-right-radius: var(--radius-3xl);
+    }
+
+    body > p {
+        border-top: none;
+        border-bottom: none;
+    }
+
+    body > p:last-of-type {
+        border-bottom: 2px solid CanvasText;
+        border-bottom-left-radius: var(--radius-3xl);
+        border-bottom-right-radius: var(--radius-3xl);
+    }
+
+    body > p > a,
+    body > a {
+        border-width: 2px;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+        outline-width: 3px;
+    }
+}
+
+
+/* ==========================================================================
+   16. FORCED COLORS MODE
+   ========================================================================== */
+
+@media (forced-colors: active) {
+
+    body::before,
+    body::after {
+        display: none !important;
+    }
+
+    body {
+        background-color: Canvas;
+        color: CanvasText;
+    }
+
+    body > h1,
+    body > p {
+        background-color: Canvas;
+        color: CanvasText;
+        border: 1px solid CanvasText;
+    }
+
+    body > h1 {
+        border-bottom: none;
+    }
+
+    body > p {
+        border-top: none;
+        border-bottom: none;
+    }
+
+    body > p:last-of-type {
+        border-bottom: 1px solid CanvasText;
+    }
+
+    body > p > a,
+    body > a {
+        color: LinkText;
+        border: 1px solid LinkText;
+        background-color: Canvas;
+    }
+
+    a:focus-visible,
+    button:focus-visible {
+        outline: 2px solid Highlight;
+        outline-offset: 2px;
+    }
+}
+
+
+/* ==========================================================================
+   17. PRINT
+   ========================================================================== */
+
+@media print {
+
+    :root {
+        --color-bg: #ffffff;
+        --color-text: #000000;
+        --color-text-muted: #333333;
+        --color-border: #cccccc;
+    }
+
+    *,
+    *::before,
+    *::after {
+        background: transparent !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    html,
+    body {
+        font-size: 11pt;
+        line-height: 1.4;
+        padding: 0;
+    }
+
+    body {
+        display: block;
+        min-height: auto;
+        text-align: left;
+    }
+
+    body::before,
+    body::after {
+        display: none !important;
+    }
+
+    body > h1 {
+        padding: 0 0 12pt;
+        margin: 0 0 12pt;
+        font-size: 20pt;
+        color: #000 !important;
+        background: none !important;
+        border: none !important;
+        border-bottom: 2pt solid #000;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    body > p {
+        padding: 0;
+        margin: 0 0 8pt;
+        font-size: 11pt;
+        color: #000 !important;
+        background: none !important;
+        border: none !important;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    body > p > a,
+    body > a {
+        padding: 0;
+        margin: 0;
+        font-size: 11pt;
+        color: #000 !important;
+        background: none !important;
+        border: none !important;
+        text-decoration: underline;
+        box-shadow: none !important;
+    }
+
+    body > p > a::before {
+        display: none;
+    }
+
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 9pt;
+        color: #555;
+    }
+}
+
+
+/* ==========================================================================
+   18. SCROLLBAR
+   ========================================================================== */
+
+@supports selector(::-webkit-scrollbar) {
+
+    ::-webkit-scrollbar {
+        width: 12px;
+        height: 12px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgb(255 255 255 / 0.25);
+        border: 3px solid transparent;
+        background-clip: content-box;
+        border-radius: var(--radius-full);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background-color: rgb(255 255 255 / 0.40);
+        background-clip: content-box;
+    }
+}
+
+@supports (scrollbar-color: auto) {
+    html {
+        scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+        scrollbar-width: thin;
+    }
+}
+
+
+/* ==========================================================================
+   19. ANIMATIONS
+   ========================================================================== */
+
+@keyframes logout-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes logout-scale-in {
+    from {
+        opacity: 0;
+        transform: scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes logout-skeleton {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+body > h1,
+body > p,
+body > a {
+    animation: logout-fade-in var(--duration-500) var(--ease-smooth) both;
+}
+
+body > h1 {
+    animation-delay: 0ms;
+}
+
+body > p:nth-of-type(1) {
+    animation-delay: 80ms;
+}
+
+body > p:nth-of-type(2) {
+    animation-delay: 160ms;
+}
+
+body > p:nth-of-type(n+3) {
+    animation-delay: 240ms;
+}
+
+body > a {
+    animation-delay: 320ms;
+}
+
+.skeleton {
+    background-color: var(--color-neutral-200);
+    border-radius: var(--radius-md);
+    animation: logout-skeleton 1.6s var(--ease-in-out) infinite;
+    background-image:
+        linear-gradient(
+            90deg,
+            transparent 0%,
+            rgb(255 255 255 / 0.4) 50%,
+            transparent 100%
+        );
+    background-size: 200% 100%;
+}
+
+
+/* ==========================================================================
+   20. FINAL OVERRIDES
+   ========================================================================== */
+
+/* Đảm bảo heading và paragraph không bị tách rời khi có nền card giả */
+body > h1 + p {
+    margin-top: 0;
+}
+
+/* Paragraph chứa link là phần tử cuối → bo góc dưới */
+body > p:has(> a) {
+    margin-bottom: 0;
+}
+
+/* Link trong paragraph chiếm trọn hàng để dễ bấm trên mobile */
+@media (max-width: 479px) {
+    body > p > a {
+        display: flex;
+        width: 100%;
+    }
+}
+
+/* Không cho phép zoom text gây vỡ layout */
+body > h1 {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+body > p {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+}
+
+/* Đảm bảo body luôn căn giữa khi nội dung ngắn */
+body {
+    gap: 0;
+}
+
+/* Đảm bảo không có khoảng trắng thừa dưới phần tử cuối */
+body > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Button-like links không bị underline */
+body > p > a,
+body > a {
+    text-decoration: none !important;
+}
+
+/* Focus ring rõ ràng trên nền tối */
+body > p > a:focus-visible,
+body > a:focus-visible {
+    outline: 3px solid var(--color-accent-300);
+    outline-offset: 3px;
+}
+
+/* Khi in, đảm bảo link không bị cắt */
+@media print {
+    body > p > a,
+    body > a {
+        white-space: normal;
+        word-break: break-all;
+    }
+}
+
+/* Hỗ trợ container tuỳ chọn nếu sau này PHP đổi cấu trúc */
+.error-card {
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+
+    padding: var(--card-padding);
+
+    background-color: rgb(255 255 255 / 0.08);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-2xl);
+
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+
+    text-align: center;
+}
+
+.error-card > h1 {
+    margin: 0 0 var(--space-4);
+    color: var(--color-neutral-0);
+    font-size: clamp(1.5rem, 1.3rem + 1.4vw, var(--font-size-3xl));
+    font-weight: var(--font-weight-extrabold);
+}
+
+.error-card > p {
+    margin: 0 0 var(--space-3);
+    color: rgb(255 255 255 / 0.82);
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+}
+
+.error-card > p:last-child {
+    margin-bottom: 0;
+}
+
+.error-card > p > a,
+.error-card > a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin-top: var(--space-2);
+    padding: var(--space-2-5) var(--space-5);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-wide);
+
+    color: var(--color-brand-900);
+    background-color: var(--color-neutral-0);
+    border: 1px solid var(--color-neutral-0);
+    border-radius: var(--radius-xl);
+    text-decoration: none;
+
+    box-shadow: var(--shadow-md);
+
+    transition:
+        transform var(--transition-fast),
+        box-shadow var(--transition-base),
+        background-color var(--transition-base);
+}
+
+.error-card > p > a:hover,
+.error-card > a:hover {
+    color: var(--color-brand-900);
+    background-color: var(--color-accent-100);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 479px) {
+    .error-card {
+        padding: var(--space-6);
+        border-radius: var(--radius-2xl);
+    }
+
+    .error-card > p > a,
+    .error-card > a {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* ==========================================================================
+   KẾT THÚC LOGOUT.CSS
+   ========================================================================== */
