@@ -1,69 +1,60 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import PublicationCard from "@/components/PublicationCard";
+import { publications } from "@/data/publications";
+import { site } from "@/data/site";
 
-export default function Home() {
+export default function HomePage() {
+  const latest = publications
+    .filter((p) => p.status === "published")
+    .sort((a, b) => b.year - a.year)
+    .slice(0, 6);
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.tsx</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <>
+      <section className="hero">
+        <div className="hero__inner">
+          <p className="hero__eyebrow">THƯ VIỆN ẤN PHẨM SỐ</p>
+          <h1 className="hero__title">{site.platformName}</h1>
+          <p className="hero__description">{site.description}</p>
+
+          <div className="hero__actions">
+            <Link className="button button--primary" href="/publications">
+              Khám phá thư viện
+            </Link>
+            <Link className="button button--secondary" href="/search">
+              Tìm kiếm ấn phẩm
+            </Link>
+          </div>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      <section
+        className="publication-section"
+        aria-labelledby="latest-publications-title"
+      >
+        <div className="publication-section__header">
+          <div>
+            <p className="section-eyebrow">ẤN PHẨM</p>
+            <h2 id="latest-publications-title">Ấn phẩm mới nhất</h2>
+          </div>
+          <Link href="/publications" className="section-link">
+            Xem toàn bộ thư viện
+          </Link>
         </div>
-      </main>
-    </div>
+
+        {latest.length === 0 ? (
+          <div className="empty-state">
+            <h3>Thư viện đang được cập nhật</h3>
+            <p>Hiện chưa có ấn phẩm nào được xuất bản.</p>
+          </div>
+        ) : (
+          <div className="publication-grid">
+            {latest.map((p) => (
+              <PublicationCard key={p.id} publication={p} />
+            ))}
+          </div>
+        )}
+      </section>
+    </>
   );
 }
