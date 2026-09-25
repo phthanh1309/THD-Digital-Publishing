@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Đọc ấn phẩm</title>
+
+<link rel="stylesheet" href="/assets/css/flipbook/black-book-view.css">
+<link rel="stylesheet" href="/assets/css/flipbook/font-awesome.min.css">
+<link rel="stylesheet" href="/assets/css/reader.css">
+</head>
+<body>
+
+<div class="reader-page">
+
+<header class="reader-header">
+  <a class="reader-back" id="reader-back" href="/publications" aria-label="Quay lại" title="Quay lại"><i class="fa fa-arrow-left"></i></a>
+  <div class="reader-heading">
+    <h1 class="reader-title" id="reader-title">Ấn phẩm số</h1>
+    <div class="reader-subtitle" id="reader-subtitle" style="display:none;"></div>
+  </div>
+  <div class="reader-actions">
+    <a class="reader-action" id="reader-download" href="#" style="display:none;" title="Tải PDF"><i class="fa fa-download"></i><span class="reader-action-label">Tải PDF</span></a>
+    <button type="button" class="reader-action" id="reader-print" style="display:none;" title="In"><i class="fa fa-print"></i><span class="reader-action-label">In</span></button>
+    <button type="button" class="reader-action" id="reader-share" style="display:none;" title="Chia sẻ"><i class="fa fa-share-alt"></i><span class="reader-action-label">Chia sẻ</span></button>
+  </div>
+</header>
+
+<main class="reader-main">
+  <div class="flipbook-wrapper" data-flipbook-wrapper>
+    <div id="thd-flipbook" class="thd-flipbook" data-flipbook></div>
+  </div>
+
+  <div class="reader-loading" data-reader-loading>
+    <div class="reader-spinner"></div>
+    <div class="reader-loading-text">Đang mở ấn phẩm…</div>
+  </div>
+
+  <div class="reader-error" data-reader-error>
+    <div class="reader-error-card">
+      <h2 class="reader-error-title">Không thể mở ấn phẩm</h2>
+      <p class="reader-error-message" data-reader-error-message>Đã xảy ra lỗi khi tải tài liệu.</p>
+    </div>
+  </div>
+
+  <div class="reader-status" data-reader-status></div>
+</main>
+
+</div>
+
+<script>
+window.PDFJS_LOCALE = { pdfJsWorker: '/assets/js/flipbook/pdf.worker.js' };
+</script>
+
+<script src="/assets/js/flipbook/jquery.min.js"></script>
+<script src="/assets/js/flipbook/html2canvas.min.js"></script>
+<script src="/assets/js/flipbook/three.min.js"></script>
+<script src="/assets/js/flipbook/pdf.min.js"></script>
+<script src="/assets/js/flipbook/3dflipbook.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  const params = new URLSearchParams(window.location.search);
+  const config = {
+    title: params.get('title') || 'Ấn phẩm số',
+    subtitle: params.get('subtitle') || '',
+    pdfUrl: params.get('pdf') || '',
+    pdfFilename: params.get('filename') || 'an-pham.pdf',
+    backUrl: params.get('back') || '/publications',
+    permissions: {
+      download: params.get('download') === '1',
+      print: params.get('print') === '1',
+      share: params.get('share') === '1',
+    },
+  };
+
+  document.title = config.title + ' — Thư viện Ấn phẩm số';
+  document.getElementById('reader-title').textContent = config.title;
+  document.getElementById('reader-back').href = config.backUrl;
+
+  if (config.subtitle) {
+    const sub = document.getElementById('reader-subtitle');
+    sub.textContent = config.subtitle;
+    sub.style.display = '';
+  }
+
+  if (config.permissions.download) {
+    const btn = document.getElementById('reader-download');
+    btn.href = config.pdfUrl;
+    btn.download = config.pdfFilename;
+    btn.style.display = '';
+  }
+
+  const loading = document.querySelector('[data-reader-loading]');
+  const errorBox = document.querySelector('[data-reader-error]');
+  const errorMessage = document.querySelector('[data-reader-error-message]');
+  const statusBox = document.querySelector('[data-reader-status]');
+
+  function hideLoading() { if (loading) loading.classList.add('is-hidden'); }
+
+  function showError(message) {
+    hideLoading();
+    if (errorBox) errorBox.classList.add('is-visible');
+    if (errorMessage) errorMessage.textContent = message || 'Không thể tải ấn phẩm.';
+  }
+
+  function showStatus(message) {
+    if (!statusBox) return;
+    statusBox.textContent = message || '';
+    statusBox.classList.toggle('is-visible', Boolean(message));
+  }
+
+  if (config.permissions.print) {
+    const printBtn = document.getElementById('reader-print');
+    printBtn.style.display = '';
+    printBtn.addEventListener('click', function () { window.print(); });
+  }
+
+  if (config.permissions.share) {
+    const shareBtn = document.getElementById('reader-share');
+    shareBtn.style.display = '';
+    shareBtn.addEventListener('click', async function () {
+      const shareData = {
+        title: config.title,
+        text: config.subtitle || config.title,
+        url: window.location.href,
+      };
+      try {
+        if (navigator.share) { await navigator.share(shareData); return; }
+        if (navigator.clipboard) {
+          await navigator.clipboard.writeText(window.location.href);
+          showStatus('Đã sao chép liên kết.');
+          window.setTimeout(function () { showStatus(''); }, 1800);
+        }
+      } catch (error) {
+        if (error && error.name === 'AbortError') return;
+      }
+    });
+  }
+
+  if (typeof window.jQuery === 'undefined') { showError('Không tải được jQuery của FlipBook.'); return; }
+  if (typeof window.jQuery.fn.FlipBook !== 'function') { showError('Không tải được thư viện 3D FlipBook.'); return; }
+  if (!config.pdfUrl) { showError('Không xác định được file PDF.'); return; }
+
+  const $book = window.jQuery('#thd-flipbook');
+
+  try {
+    $book.FlipBook({
+      pdf: config.pdfUrl,
+      propertiesCallback: function (props) {
+        props.rtl = false;
+        props.cachedPages = 8;
+        props.pagesForPredicting = 3;
+        props.preloadPages = 3;
+        props.renderInactivePages = false;
+        props.renderInactivePagesOnMobile = false;
+        props.renderWhileFlipping = false;
+        props.bookStyle = 'volume';
+        return props;
+      },
+      template: {
+        html: '/assets/templates/default-book-view.html',
+        styles: ['/assets/css/flipbook/black-book-view.css'],
+        links: [{ rel: 'stylesheet', href: '/assets/css/flipbook/font-awesome.min.css' }],
+        script: '/assets/js/flipbook/default-book-view.js'
+      },
+      ready: function () { hideLoading(); },
+      error: function (error) {
+        showError(error && error.message ? error.message : 'Không thể tải file PDF.');
+      }
+    });
+  } catch (error) {
+    showError(error && error.message ? error.message : 'Không thể khởi tạo trình đọc ấn phẩm.');
+  }
+})();
+</script>
+
+</body>
+</html>
