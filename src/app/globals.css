@@ -2624,7 +2624,7 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     box-shadow: var(--shadow-lg);
 }
 @media (min-width: 768px) {
-    .publication-detail__cover { max-width: none; margin-inline: 0;position: relative; position: sticky; top: calc(var(--header-height) + var(--space-6)); }
+    .publication-detail__cover { max-width: none; margin-inline: 0;position:relative; position: sticky; top: calc(var(--header-height) + var(--space-6)); }
 }
 .publication-detail__cover-placeholder {
     position: absolute; inset: 0;
