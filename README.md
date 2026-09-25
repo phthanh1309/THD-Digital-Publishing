@@ -244,4 +244,8 @@ Repository hiện chưa khai báo một license riêng. Nếu dự án được 
 ---
 
 **THD Digital Publishing**  
+<<<<<<< HEAD
 *Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo*
+=======
+*Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo*
+>>>>>>> 7a19e1697ae20b27623c5ad0981d5e2cb9182711
