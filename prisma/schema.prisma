@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PublicationStatus {
+  draft
+  published
+  archived
+}
+
+model Publication {
+  id            String            @id
+  slug          String            @unique
+  title         String
+  subtitle      String            @default("")
+  year          Int
+  description   String
+  cover         String
+  pdf           String            @default("")
+  pageCount     Int
+  status        PublicationStatus @default(draft)
+  author        String
+  editor        String            @default("")
+  language      String            @default("")
+  publishedAt   String            @default("")
+  allowDownload Boolean           @default(false)
+  allowPrint    Boolean           @default(false)
+  allowShare    Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}

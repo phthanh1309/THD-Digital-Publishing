@@ -1,13 +1,14 @@
 import Link from "next/link";
 import PublicationCard from "@/components/PublicationCard";
-import { publications } from "@/data/publications";
+import { prisma } from "@/lib/prisma";
 import { site } from "@/data/site";
 
-export default function HomePage() {
-  const latest = publications
-    .filter((p) => p.status === "published")
-    .sort((a, b) => b.year - a.year)
-    .slice(0, 6);
+export default async function HomePage() {
+  const latest = await prisma.publication.findMany({
+    where: { status: "published" },
+    orderBy: { year: "desc" },
+    take: 6,
+  });
 
   return (
     <>
@@ -50,7 +51,12 @@ export default function HomePage() {
         ) : (
           <div className="publication-grid">
             {latest.map((p) => (
-              <PublicationCard key={p.id} publication={p} />
+              <PublicationCard
+                key={p.id}
+                publication={p as unknown as React.ComponentProps<
+                  typeof PublicationCard
+                >["publication"]}
+              />
             ))}
           </div>
         )}

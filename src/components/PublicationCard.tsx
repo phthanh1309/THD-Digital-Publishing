@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Publication } from "@/data/publications";
+import type { Publication } from "@prisma/client";
 import { excerpt } from "@/lib/utils";
 
 type Props = {
