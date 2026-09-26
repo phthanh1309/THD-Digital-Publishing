@@ -4,8 +4,8 @@
 
 Một nền tảng web dành cho việc giới thiệu và quản lý thư viện **tập san, kỷ yếu và các ấn phẩm số** của THPT A Trần Hưng Đạo.
 
-> **Trạng thái:** Prototype / đang phát triển  
-> Hiện tại dữ liệu ấn phẩm được khai báo tĩnh bằng TypeScript. Chưa tích hợp PostgreSQL, Prisma hoặc hệ thống quản trị nội dung.
+> **Trạng thái:** Đang phát triển (Work in progress)
+> Đã tích hợp **PostgreSQL + Prisma** cho tầng dữ liệu. **Chưa có** hệ thống quản trị (admin) cho ban biên tập.
 
 ## ✨ Tổng quan
 
@@ -26,20 +26,20 @@ Giao diện được thiết kế theo hướng tối giản, ưu tiên khả n�
 | [Next.js](https://nextjs.org/) 16 | Framework React cho ứng dụng web |
 | [React](https://react.dev/) 19 | Xây dựng giao diện |
 | TypeScript | Kiểu dữ liệu và phát triển an toàn hơn |
+| **PostgreSQL** | Cơ sở dữ liệu quan hệ, lưu trữ dữ liệu ấn phẩm |
+| **Prisma ORM 6** | Định nghĩa schema, migration và truy vấn database |
 | CSS | Styling giao diện |
 | ESLint | Kiểm tra chất lượng mã nguồn |
 | Next/Image | Tối ưu hình ảnh |
 | Next/Link | Điều hướng phía client |
 
-### Lưu ý về database
+### Về database
 
-Tên/mô tả cũ của repository có đề cập **PostgreSQL**, nhưng code hiện tại **chưa sử dụng PostgreSQL** và cũng chưa có Prisma schema.
+Dự án hiện đã chuyển từ dữ liệu tĩnh (TypeScript) sang **PostgreSQL**, truy cập qua **Prisma ORM**. Schema được định nghĩa tại `prisma/schema.prisma`, khớp với type `Publication` gốc từng dùng trong `src/data/publications.ts`.
 
-Dữ liệu mẫu hiện được lưu trực tiếp trong:
+Dữ liệu mẫu ban đầu (2 ấn phẩm: *Tập san 2026*, *Kỷ yếu 2025*) được seed vào database thông qua `prisma/seed.ts`.
 
-`src/data/publications.ts`
-
-Điều này phù hợp cho giai đoạn dựng giao diện/prototype. Khi chuyển sang production, có thể thay lớp dữ liệu này bằng PostgreSQL + ORM/API.
+> ⚠️ **Lưu ý về Prisma:** dự án dùng Prisma bản ổn định (6.x), **không** dùng Prisma 8 (đang ở giai đoạn release candidate). Nếu `npx prisma init` tạo ra file `prisma.config.ts` thay vì `prisma/schema.prisma` + `.env`, có nghĩa là npm đã cài nhầm bản Prisma 8 RC — cần gỡ và cài lại đúng `prisma@6 @prisma/client@6`.
 
 ## 📁 Cấu trúc dự án
 
@@ -47,6 +47,10 @@ Dữ liệu mẫu hiện được lưu trực tiếp trong:
 THD-Digital-Publishing/
 ├── public/
 │   └── logo.webp
+│
+├── prisma/
+│   ├── schema.prisma
+│   └── seed.ts
 │
 ├── src/
 │   ├── app/
@@ -61,12 +65,13 @@ THD-Digital-Publishing/
 │   │   └── SiteNav.tsx
 │   │
 │   ├── data/
-│   │   ├── publications.ts
 │   │   └── site.ts
 │   │
 │   └── lib/
+│       ├── prisma.ts
 │       └── utils.ts
 │
+├── .env
 ├── eslint.config.mjs
 ├── next.config.ts
 ├── package.json
@@ -74,12 +79,15 @@ THD-Digital-Publishing/
 └── tsconfig.json
 ```
 
+> Ghi chú: `src/data/publications.ts` (dữ liệu tĩnh cũ) có thể vẫn còn tồn tại trong quá trình chuyển đổi, nhưng không còn được các trang chính sử dụng nữa — dữ liệu thật giờ nằm trong PostgreSQL.
+
 ## 🚀 Bắt đầu
 
 ### Yêu cầu
 
 - Node.js 20+
 - npm
+- PostgreSQL (chạy local hoặc qua Docker)
 
 Kiểm tra phiên bản:
 
@@ -101,7 +109,34 @@ cd THD-Digital-Publishing
 npm install
 ```
 
-### 3. Chạy môi trường development
+### 3. Cấu hình database
+
+Tạo file `.env` ở thư mục gốc:
+
+```env
+DATABASE_URL="postgresql://user:password@localhost:5432/thd_publishing?schema=public"
+```
+
+Nếu chưa có PostgreSQL sẵn, có thể chạy nhanh bằng Docker:
+
+```bash
+docker run --name thd-pg -e POSTGRES_PASSWORD=password -e POSTGRES_DB=thd_publishing -p 5432:5432 -d postgres
+```
+
+### 4. Chạy migration và seed dữ liệu mẫu
+
+```bash
+npx prisma migrate dev
+npx prisma db seed
+```
+
+Kiểm tra dữ liệu bằng Prisma Studio:
+
+```bash
+npx prisma studio
+```
+
+### 5. Chạy môi trường development
 
 ```bash
 npm run dev
@@ -127,11 +162,20 @@ npm run start
 
 # Kiểm tra ESLint
 npm run lint
+
+# Chạy migration Prisma
+npx prisma migrate dev
+
+# Seed dữ liệu mẫu
+npx prisma db seed
+
+# Mở giao diện xem/sửa dữ liệu
+npx prisma studio
 ```
 
 ## 📰 Dữ liệu ấn phẩm
 
-Mỗi ấn phẩm hiện được biểu diễn bởi kiểu `Publication`:
+Mỗi ấn phẩm được định nghĩa trong `prisma/schema.prisma` (model `Publication`), khớp với type gốc:
 
 ```ts
 type Publication = {
@@ -146,19 +190,26 @@ type Publication = {
   pageCount: number;
   status: "draft" | "published" | "archived";
   author: string;
+  editor: string;
+  language: string;
+  publishedAt: string;
   allowDownload: boolean;
   allowPrint: boolean;
   allowShare: boolean;
 };
 ```
 
-Các trường này đã được chuẩn bị để có thể phát triển thành hệ thống quản lý ấn phẩm đầy đủ hơn.
+Trong Next.js, type này được suy ra tự động từ Prisma Client:
 
-Để thêm hoặc chỉnh sửa dữ liệu mẫu, chỉnh sửa:
-
-```text
-src/data/publications.ts
+```ts
+import type { Publication } from "@prisma/client";
 ```
+
+Để thêm hoặc chỉnh sửa dữ liệu, dùng một trong các cách sau:
+
+- **Prisma Studio:** `npx prisma studio` — chỉnh trực tiếp qua giao diện.
+- **Seed script:** sửa `prisma/seed.ts` rồi chạy lại `npx prisma db seed`.
+- *(Sắp tới)* qua trang quản trị (admin) — xem phần "Định hướng phát triển".
 
 Thông tin chung của website nằm tại:
 
@@ -195,23 +246,27 @@ Hiển thị thông tin nhà trường và bản quyền.
 
 Các hạng mục dự kiến cho những phiên bản tiếp theo:
 
-- [ ] Tích hợp PostgreSQL.
-- [ ] Tích hợp Prisma hoặc ORM tương đương.
-- [ ] Xây dựng API cho ấn phẩm.
+- [x] Tích hợp PostgreSQL.
+- [x] Tích hợp Prisma ORM.
+- [ ] **Xây dựng hệ thống quản trị (admin) cho ban biên tập** — đăng nhập, thêm/sửa/xoá ấn phẩm, quản lý trạng thái draft/published/archived.
+- [ ] Xây dựng API cho ấn phẩm (REST hoặc Server Actions).
 - [ ] Hoàn thiện trang thư viện `/publications`.
 - [ ] Hoàn thiện chức năng tìm kiếm `/search`.
 - [ ] Trang chi tiết cho từng ấn phẩm.
 - [ ] Hỗ trợ đọc PDF trực tiếp trên trình duyệt.
 - [ ] Quản lý quyền tải xuống, in và chia sẻ.
-- [ ] Hệ thống quản trị nội dung cho ban biên tập.
-- [ ] Upload và quản lý ảnh bìa/PDF.
+- [ ] Upload và quản lý ảnh bìa/PDF (hiện đang dùng đường dẫn tĩnh trong `public/`).
 - [ ] Phân loại ấn phẩm theo năm, loại và chủ đề.
 - [ ] Tối ưu SEO và metadata.
 - [ ] Triển khai production.
 
 ## 📌 Trạng thái hiện tại
 
-Phiên bản hiện tại tập trung vào **kiến trúc giao diện và dữ liệu mẫu**. Một số liên kết điều hướng đã được chuẩn bị trong UI nhưng các route tương ứng vẫn cần được triển khai đầy đủ.
+Tầng dữ liệu đã chuyển từ TypeScript tĩnh sang **PostgreSQL + Prisma**, trang chủ (`/`) đã đọc dữ liệu trực tiếp từ database qua Prisma Client.
+
+**Chưa hoàn thành:**
+- Hệ thống quản trị (admin) — hiện việc thêm/sửa dữ liệu chỉ làm được qua Prisma Studio hoặc chỉnh seed script, chưa có giao diện dành cho ban biên tập.
+- Các route `/publications`, `/search`, trang chi tiết ấn phẩm vẫn cần được triển khai đầy đủ.
 
 Đây là nền móng ban đầu cho hệ thống **thư viện ấn phẩm số của THPT A Trần Hưng Đạo**, không phải phiên bản production hoàn chỉnh.
 
@@ -240,12 +295,3 @@ npm run build
 ## 📄 License
 
 Repository hiện chưa khai báo một license riêng. Nếu dự án được phát hành công khai với mục đích cho phép tái sử dụng, nên bổ sung file `LICENSE` và lựa chọn license phù hợp.
-
----
-
-**THD Digital Publishing**  
-<<<<<<< HEAD
-*Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo*
-=======
-*Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo*
->>>>>>> 7a19e1697ae20b27623c5ad0981d5e2cb9182711
