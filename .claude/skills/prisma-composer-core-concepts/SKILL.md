@@ -492,7 +492,7 @@ Name the gap instead of inventing an API:
 2. **No in-memory contract bindings.** A dependency can't yet be wired to a
    co-located handler without HTTP; use `bootstrapService` with a loopback
    fake.
-3. **RPC over HTTP is the only contract kind.** No gRPC, WebSocket, or
+3. **RPC over HTTP is the only contract kind. you HAVE to reopend it** No gRPC, WebSocket, or
    streaming contracts.
 
 For anything else missing, check `examples/`, `docs/design/10-domains/`, and
