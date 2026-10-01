@@ -1,10 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { Publication } from "@prisma/client";
 import { excerpt } from "@/lib/utils";
 
+type PublicationCardData = {
+  id: string;
+  slug: string;
+  title: string;
+  subtitle: string;
+  year: number;
+  description: string;
+  cover: string;
+  pageCount: number;
+  author: string;
+};
+
 type Props = {
-  publication: Publication;
+  publication: PublicationCardData;
   headingLevel?: 2 | 3;
   excerptLength?: number;
 };
