@@ -47,13 +47,23 @@ export default async function EditPublicationPage({
           </div>
 
           <div className="form-field">
-            <label htmlFor="cover">Đường dẫn ảnh bìa</label>
-            <input id="cover" name="cover" type="text" defaultValue={p.cover} />
-          </div>
+            <label htmlFor="coverFile">Ảnh bìa (jpg/png/webp)</label>
+            {p.cover && (
+                <p style={{ fontSize: 13, color: "#666", margin: "4px 0" }}>
+                Hiện tại: {p.cover}
+                </p>
+            )}
+            <input id="coverFile" name="coverFile" type="file" accept="image/jpeg,image/png,image/webp" />
+            </div>
 
           <div className="form-field">
-            <label htmlFor="pdf">Đường dẫn PDF</label>
-            <input id="pdf" name="pdf" type="text" defaultValue={p.pdf} />
+            <label htmlFor="pdfFile">File PDF</label>
+            {p.pdf && (
+                <p style={{ fontSize: 13, color: "#666", margin: "4px 0" }}>
+                Hiện tại: {p.pdf}
+                </p>
+            )}
+            <input id="pdfFile" name="pdfFile" type="file" accept="application/pdf" />
           </div>
 
           <div className="form-field">

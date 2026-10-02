@@ -20,7 +20,7 @@ export default async function PublicationDetailPage({
   const readerParams = new URLSearchParams({
     title: p.title,
     subtitle: p.subtitle,
-    pdf: p.pdf,
+    pdf: p.pdf ? `/api/files/${p.pdf}` : "",
     filename: `${p.slug}.pdf`,
     back: `/publications/${p.slug}`,
     download: p.allowDownload ? "1" : "0",
@@ -36,7 +36,7 @@ export default async function PublicationDetailPage({
       <div className="publication-detail__inner">
         <div className="publication-detail__cover">
           {p.cover ? (
-            <Image src={p.cover} alt={p.title} fill sizes="420px" />
+           <Image src={`/api/files/${p.cover}`} alt={p.title} fill sizes="100vw" />
           ) : (
             <div className="publication-detail__cover-placeholder" aria-hidden="true">
               <span>{p.year > 0 ? p.year : "ẤN PHẨM"}</span>
@@ -108,7 +108,7 @@ export default async function PublicationDetailPage({
             )}
 
             {p.allowDownload && p.pdf && (
-              <a className="button button--secondary" href={p.pdf} download>
+              <a className="button button--secondary" href={`/api/files/${p.pdf}?download=1`} download>
                 Tải xuống
               </a>
             )}
@@ -139,7 +139,7 @@ export default async function PublicationDetailPage({
           <div className="publication-preview__content">
             {p.cover ? (
               <Link href={readerUrl} aria-label={`Mở reader ${p.title}`}>
-                <Image src={p.cover} alt={p.title} fill sizes="100vw" />
+                <Image src={`/api/files/${p.cover}`} alt={p.title} fill sizes="100vw" />
               </Link>
             ) : (
               <Link href={readerUrl} className="publication-preview__placeholder">

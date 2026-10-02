@@ -33,13 +33,13 @@ export default function NewPublicationPage() {
           </div>
 
           <div className="form-field">
-            <label htmlFor="cover">Đường dẫn ảnh bìa</label>
-            <input id="cover" name="cover" type="text" placeholder="/logo.webp" />
+            <label htmlFor="coverFile">Ảnh bìa (jpg/png/webp)</label>
+            <input id="coverFile" name="coverFile" type="file" accept="image/jpeg,image/png,image/webp" />
           </div>
 
           <div className="form-field">
-            <label htmlFor="pdf">Đường dẫn PDF</label>
-            <input id="pdf" name="pdf" type="text" placeholder="/samples/sample.pdf" />
+            <label htmlFor="pdfFile">File PDF</label>
+            <input id="pdfFile" name="pdfFile" type="file" accept="application/pdf" />
           </div>
 
           <div className="form-field">

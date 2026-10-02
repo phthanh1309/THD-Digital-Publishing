@@ -37,7 +37,7 @@ export default function PublicationCard({
       >
         {p.cover ? (
           <Image
-            src={p.cover}
+            src={p.cover ? `/api/files/${p.cover}` : p.cover}
             alt={p.title}
             fill
             sizes="(max-width: 479px) 108px, (max-width: 1024px) 50vw, 300px"
