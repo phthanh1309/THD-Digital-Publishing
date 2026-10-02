@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { publications } from "@/data/publications";
+import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import ShareButton from "@/components/ShareButton";
 
@@ -11,23 +11,23 @@ export default async function PublicationDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const p = publications.find(
-    (item) => item.slug === slug && item.status === "published"
-  );
+  const p = await prisma.publication.findFirst({
+    where: { slug, status: "published" },
+  });
 
   if (!p) notFound();
 
   const readerParams = new URLSearchParams({
-  title: p.title,
-  subtitle: p.subtitle,
-  pdf: p.pdf,
-  filename: `${p.slug}.pdf`,
-  back: `/publications/${p.slug}`,
-  download: p.allowDownload ? "1" : "0",
-  print: p.allowPrint ? "1" : "0",
-  share: p.allowShare ? "1" : "0",
-});
-const readerUrl = `/reader.html?${readerParams.toString()}`;
+    title: p.title,
+    subtitle: p.subtitle,
+    pdf: p.pdf,
+    filename: `${p.slug}.pdf`,
+    back: `/publications/${p.slug}`,
+    download: p.allowDownload ? "1" : "0",
+    print: p.allowPrint ? "1" : "0",
+    share: p.allowShare ? "1" : "0",
+  });
+  const readerUrl = `/reader.html?${readerParams.toString()}`;
   const canonicalUrl = `/publications/${p.slug}`;
   const readerAvailable = p.pdf !== "";
 
@@ -107,13 +107,13 @@ const readerUrl = `/reader.html?${readerParams.toString()}`;
               </span>
             )}
 
-            {p.allowDownload && (
-              <a className="button button--secondary" href={`/api/publications/${p.slug}/download`}>
+            {p.allowDownload && p.pdf && (
+              <a className="button button--secondary" href={p.pdf} download>
                 Tải xuống
               </a>
             )}
-            {p.allowPrint && (
-              <a className="button button--secondary" href={`/api/publications/${p.slug}/print`}>
+            {p.allowPrint && readerAvailable && (
+              <a className="button button--secondary" href={readerUrl}>
                 In ấn phẩm
               </a>
             )}

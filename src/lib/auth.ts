@@ -7,6 +7,8 @@ export async function verifyLogin(username: string, password: string) {
   const validUsername = process.env.ADMIN_USERNAME ?? "";
   const validHash = process.env.ADMIN_PASSWORD_HASH ?? "";
 
+  console.log("hash length:", validHash.length, "| user:", JSON.stringify(validUsername)); 
+
   if (username !== validUsername || !validHash) return false;
   return bcrypt.compare(password, validHash);
 }

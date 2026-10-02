@@ -1,23 +1,18 @@
 import Link from "next/link";
 import PublicationCard from "@/components/PublicationCard";
-import { publications } from "@/data/publications";
+import { prisma } from "@/lib/prisma";
 
 const PER_PAGE = 12;
 
-type SearchParams = {
-  q?: string;
-  year?: string;
-  sort?: string;
-  page?: string;
-};
+type SearchParams = { q?: string; year?: string; sort?: string; page?: string };
 
-function buildUrl(params: Record<string, string | number | undefined>) {
+function buildUrl(base: string, params: Record<string, string | number | undefined>) {
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== "" && v !== null) usp.set(k, String(v));
   }
   const qs = usp.toString();
-  return `/publications${qs ? `?${qs}` : ""}`;
+  return `${base}${qs ? `?${qs}` : ""}`;
 }
 
 export default async function PublicationsPage({
@@ -31,47 +26,42 @@ export default async function PublicationsPage({
   const sort = sp.sort ?? "newest";
   const page = Math.max(1, Number(sp.page) || 1);
 
-  let items = publications.filter((p) => p.status === "published");
-
+  const where: Record<string, unknown> = { status: "published" };
   if (q) {
-    const needle = q.toLowerCase();
-    items = items.filter(
-      (p) =>
-        p.title.toLowerCase().includes(needle) ||
-        p.author.toLowerCase().includes(needle)
-    );
+    where.OR = [
+      { title: { contains: q, mode: "insensitive" } },
+      { author: { contains: q, mode: "insensitive" } },
+    ];
   }
+  if (year) where.year = year;
 
-  if (year) {
-    items = items.filter((p) => p.year === year);
-  }
+  const orderBy =
+    sort === "oldest"
+      ? { year: "asc" as const }
+      : sort === "title_asc"
+      ? { title: "asc" as const }
+      : sort === "title_desc"
+      ? { title: "desc" as const }
+      : { year: "desc" as const };
 
-  items = [...items].sort((a, b) => {
-    switch (sort) {
-      case "oldest":
-        return a.year - b.year;
-      case "title_asc":
-        return a.title.localeCompare(b.title, "vi");
-      case "title_desc":
-        return b.title.localeCompare(a.title, "vi");
-      default:
-        return b.year - a.year;
-    }
-  });
+  const [totalItems, pageItems, yearsRaw] = await Promise.all([
+    prisma.publication.count({ where }),
+    prisma.publication.findMany({
+      where,
+      orderBy,
+      skip: (page - 1) * PER_PAGE,
+      take: PER_PAGE,
+    }),
+    prisma.publication.findMany({
+      where: { status: "published" },
+      select: { year: true },
+      distinct: ["year"],
+    }),
+  ]);
 
-  const totalItems = items.length;
+  const availableYears = yearsRaw.map((y) => y.year).sort((a, b) => b - a);
   const totalPages = Math.max(1, Math.ceil(totalItems / PER_PAGE));
   const currentPage = Math.min(page, totalPages);
-  const pageItems = items.slice(
-    (currentPage - 1) * PER_PAGE,
-    currentPage * PER_PAGE
-  );
-
-  const availableYears = [
-    ...new Set(
-      publications.filter((p) => p.status === "published").map((p) => p.year)
-    ),
-  ].sort((a, b) => b - a);
 
   const startPage = Math.max(1, currentPage - 2);
   const endPage = Math.min(totalPages, currentPage + 2);
@@ -79,6 +69,8 @@ export default async function PublicationsPage({
     { length: endPage - startPage + 1 },
     (_, i) => startPage + i
   );
+
+  const hasActiveFilter = q !== "" || year !== undefined || sort !== "newest";
 
   return (
     <>
@@ -138,9 +130,11 @@ export default async function PublicationsPage({
               <button type="submit" className="button button--primary">
                 Lọc
               </button>
-              <Link href="/publications" className="button button--secondary">
-                Xóa lọc
-              </Link>
+              {hasActiveFilter && (
+                <Link href="/publications" className="button button--secondary">
+                  Xóa lọc
+                </Link>
+              )}
             </div>
           </form>
 
@@ -175,7 +169,7 @@ export default async function PublicationsPage({
                 <nav className="pagination" aria-label="Phân trang">
                   {currentPage > 1 && (
                     <Link
-                      href={buildUrl({ q, year, sort, page: currentPage - 1 })}
+                      href={buildUrl("/publications", { q, year, sort, page: currentPage - 1 })}
                       rel="prev"
                     >
                       ← Trước
@@ -189,7 +183,7 @@ export default async function PublicationsPage({
                           {n}
                         </span>
                       ) : (
-                        <Link key={n} href={buildUrl({ q, year, sort, page: n })}>
+                        <Link key={n} href={buildUrl("/publications", { q, year, sort, page: n })}>
                           {n}
                         </Link>
                       )
@@ -198,7 +192,7 @@ export default async function PublicationsPage({
 
                   {currentPage < totalPages && (
                     <Link
-                      href={buildUrl({ q, year, sort, page: currentPage + 1 })}
+                      href={buildUrl("/publications", { q, year, sort, page: currentPage + 1 })}
                       rel="next"
                     >
                       Sau →
