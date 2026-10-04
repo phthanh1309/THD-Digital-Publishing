@@ -2,296 +2,204 @@
 
 **Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo**
 
-Một nền tảng web dành cho việc giới thiệu và quản lý thư viện **tập san, kỷ yếu và các ấn phẩm số** của THPT A Trần Hưng Đạo.
+Một nền tảng web để giới thiệu và quản lý thư viện **tập san, kỷ yếu và các ấn phẩm số** của THPT A Trần Hưng Đạo. Người đọc có thể khám phá, tìm kiếm, đọc trực tuyến (flipbook) và tương tác (thích) với ấn phẩm; ban biên tập quản lý toàn bộ nội dung qua khu vực quản trị riêng.
 
-> **Trạng thái:** Đang phát triển (Work in progress)
-> Đã tích hợp **PostgreSQL + Prisma** cho tầng dữ liệu. **Chưa có** hệ thống quản trị (admin) cho ban biên tập.
+> **Trạng thái:** Đang phát triển tích cực. Các tính năng cốt lõi (đọc, tìm kiếm, quản trị, tài khoản người dùng) đã hoạt động. Đang mở rộng thêm tương tác xã hội (Like/Comment/Favorite/Reading History) và sẽ làm lại giao diện bằng Tailwind CSS ở giai đoạn cuối.
 
 ## ✨ Tổng quan
 
-THD Digital Publishing được xây dựng với mục tiêu tạo một không gian tập trung để học sinh, giáo viên và độc giả có thể:
-
-- Khám phá các ấn phẩm số của nhà trường.
-- Xem thông tin cơ bản của từng ấn phẩm.
-- Tìm kiếm ấn phẩm.
-- Hiển thị bìa, năm xuất bản, mô tả và số trang.
-- Mở rộng về sau thành một hệ thống thư viện ấn phẩm hoàn chỉnh.
-
-Giao diện được thiết kế theo hướng tối giản, ưu tiên khả năng đọc và trải nghiệm trên nhiều kích thước màn hình.
+- Khám phá, tìm kiếm ấn phẩm theo tên/tác giả/năm, sắp xếp và phân trang.
+- Trang chi tiết: bìa, mô tả, tác giả, biên tập, ngày xuất bản, số trang.
+- Đọc trực tuyến bằng flipbook 3D (3DFlipBook + pdf.js), hỗ trợ tải xuống/in theo quyền từng ấn phẩm.
+- Tài khoản người dùng: đăng ký bằng email (có xác thực qua mail), hoặc đăng nhập bằng Google/Facebook. Mỗi người có trang hồ sơ (tên, giới thiệu, ảnh đại diện).
+- Người dùng đã đăng nhập có thể **thích** ấn phẩm.
+- Khu vực quản trị (`/admin`) dành riêng cho tài khoản có vai trò `ADMIN`: thêm/sửa/xóa ấn phẩm, upload ảnh bìa + file PDF thật, quản lý trạng thái draft/published/archived và quyền tải xuống/in/chia sẻ.
+- Ấn phẩm ở trạng thái draft/archived **không** hiển thị ở bất kỳ trang công khai nào.
 
 ## 🛠️ Công nghệ
 
 | Công nghệ | Vai trò |
 | --- | --- |
-| [Next.js](https://nextjs.org/) 16 | Framework React cho ứng dụng web |
-| [React](https://react.dev/) 19 | Xây dựng giao diện |
-| TypeScript | Kiểu dữ liệu và phát triển an toàn hơn |
-| **PostgreSQL** | Cơ sở dữ liệu quan hệ, lưu trữ dữ liệu ấn phẩm |
-| **Prisma ORM 6** | Định nghĩa schema, migration và truy vấn database |
-| CSS | Styling giao diện |
-| ESLint | Kiểm tra chất lượng mã nguồn |
-| Next/Image | Tối ưu hình ảnh |
-| Next/Link | Điều hướng phía client |
+| [Next.js](https://nextjs.org/) 16 (App Router) | Framework React, Server Actions, Route Handlers |
+| [React](https://react.dev/) 19 | Giao diện |
+| TypeScript | Kiểu dữ liệu, an toàn khi phát triển |
+| **PostgreSQL** | Cơ sở dữ liệu chính |
+| **Prisma ORM 6** | Schema, migration, truy vấn database |
+| **Auth.js (next-auth@beta)** | Xác thực: Credentials (email+mật khẩu), Google OAuth, Facebook OAuth |
+| **Resend** | Gửi email xác thực tài khoản |
+| **bcryptjs** | Băm mật khẩu |
+| CSS thuần | Styling (kế thừa từ bản thiết kế gốc; sẽ chuyển sang Tailwind CSS ở giai đoạn sau) |
+| 3DFlipBook, pdf.js, three.js | Reader đọc PDF dạng lật trang |
 
-### Về database
+> ⚠️ Dự án cố định dùng **Prisma 6.x** (ổn định), không dùng Prisma 7/8 (đang major update). Bỏ qua cảnh báo "Update available" khi chạy lệnh Prisma.
 
-Dự án hiện đã chuyển từ dữ liệu tĩnh (TypeScript) sang **PostgreSQL**, truy cập qua **Prisma ORM**. Schema được định nghĩa tại `prisma/schema.prisma`, khớp với type `Publication` gốc từng dùng trong `src/data/publications.ts`.
-
-Dữ liệu mẫu ban đầu (2 ấn phẩm: *Tập san 2026*, *Kỷ yếu 2025*) được seed vào database thông qua `prisma/seed.ts`.
-
-> ⚠️ **Lưu ý về Prisma:** dự án dùng Prisma bản ổn định (6.x), **không** dùng Prisma 8 (đang ở giai đoạn release candidate). Nếu `npx prisma init` tạo ra file `prisma.config.ts` thay vì `prisma/schema.prisma` + `.env`, có nghĩa là npm đã cài nhầm bản Prisma 8 RC — cần gỡ và cài lại đúng `prisma@6 @prisma/client@6`.
-
-## 📁 Cấu trúc dự án
+## 📁 Cấu trúc dự án (rút gọn)
 
 ```text
-THD-Digital-Publishing/
+thd-publishing/
 ├── public/
-│   └── logo.webp
+│   ├── logo.webp
+│   ├── reader.html              # Trang đọc flipbook (tĩnh, không qua layout Next.js)
+│   └── assets/                  # Thư viện flipbook (jQuery, three.js, pdf.js...)
+│
+├── storage/                     # File thật: covers/, pdfs/, avatars/ — KHÔNG public trực tiếp
+│                                 # (phục vụ qua /api/files/..., có kiểm tra quyền)
 │
 ├── prisma/
-│   ├── schema.prisma
-│   └── seed.ts
+│   └── schema.prisma             # User, Account, Session, VerificationToken,
+│                                  # Publication, Like...
+│
+├── scripts/
+│   └── create-admin.ts           # Tạo/cập nhật tài khoản ADMIN đầu tiên
 │
 ├── src/
-│   ├── app/
-│   │   ├── globals.css
-│   │   ├── layout.tsx
-│   │   └── page.tsx
-│   │
+│   ├── middleware.ts              # Bảo vệ /admin/* bằng Auth.js (role === ADMIN)
+│   ├── lib/
+│   │   ├── prisma.ts
+│   │   ├── auth-nextauth.ts       # Cấu hình Auth.js (providers, callbacks)
+│   │   ├── auth-adapter.ts        # Adapter tùy chỉnh: tự sinh username cho tài khoản OAuth
+│   │   └── resend.ts
 │   ├── components/
 │   │   ├── PublicationCard.tsx
-│   │   ├── SiteFooter.tsx
-│   │   ├── SiteHeader.tsx
-│   │   └── SiteNav.tsx
-│   │
-│   ├── data/
-│   │   └── site.ts
-│   │
-│   └── lib/
-│       ├── prisma.ts
-│       └── utils.ts
-│
-├── .env
-├── eslint.config.mjs
-├── next.config.ts
-├── package.json
-├── package-lock.json
-└── tsconfig.json
+│   │   ├── SiteHeader.tsx / SiteFooter.tsx / SiteNav.tsx
+│   │   ├── LikeButton.tsx
+│   │   └── ShareButton.tsx
+│   └── app/
+│       ├── (site)/                # Toàn bộ trang công khai, có SiteHeader/Footer riêng
+│       │   ├── layout.tsx
+│       │   ├── page.tsx                      # Trang chủ
+│       │   ├── publications/page.tsx         # Thư viện (lọc/sắp xếp/phân trang)
+│       │   ├── publications/[slug]/page.tsx  # Chi tiết ấn phẩm + Like + reader
+│       │   └── search/page.tsx
+│       ├── login/page.tsx          # Đăng nhập chung (user & admin), Google/Facebook
+│       ├── register/page.tsx       # Đăng ký email + mật khẩu
+│       ├── verify/page.tsx         # Xác thực email qua link gửi bằng Resend
+│       ├── profile/page.tsx        # Hồ sơ cá nhân (tên, bio, avatar)
+│       ├── admin/                  # Khu vực quản trị, bảo vệ bởi middleware
+│       │   ├── layout.tsx          # CSS + layout riêng cho admin, không có header công khai
+│       │   ├── page.tsx            # Dashboard: thống kê + danh sách ấn phẩm
+│       │   └── publications/
+│       │       ├── actions.ts      # Server Actions: tạo/sửa/xóa, upload file
+│       │       ├── new/page.tsx
+│       │       └── [id]/edit/page.tsx
+│       └── api/
+│           ├── auth/[...nextauth]/route.ts
+│           └── files/[...path]/route.ts   # Phục vụ file từ storage/, có kiểm tra quyền
 ```
-
-> Ghi chú: `src/data/publications.ts` (dữ liệu tĩnh cũ) có thể vẫn còn tồn tại trong quá trình chuyển đổi, nhưng không còn được các trang chính sử dụng nữa — dữ liệu thật giờ nằm trong PostgreSQL.
 
 ## 🚀 Bắt đầu
 
 ### Yêu cầu
 
-- Node.js 20+
-- npm
-- PostgreSQL (chạy local hoặc qua Docker)
+- Node.js 20+, npm
+- PostgreSQL (cài local hoặc Docker)
+- Tài khoản Resend (gửi email xác thực)
+- Google Cloud OAuth Client + Meta for Developers App (đăng nhập Google/Facebook)
 
-Kiểm tra phiên bản:
-
-```bash
-node -v
-npm -v
-```
-
-### 1. Clone repository
+### 1. Cài đặt
 
 ```bash
 git clone https://github.com/phthanh1309/THD-Digital-Publishing.git
 cd THD-Digital-Publishing
-```
-
-### 2. Cài đặt dependencies
-
-```bash
 npm install
 ```
 
-### 3. Cấu hình database
+### 2. Cấu hình môi trường
 
-Tạo file `.env` ở thư mục gốc:
+Tạo **cả hai** file `.env` và `.env.local` ở thư mục gốc (Prisma CLI đọc `.env`, Next.js đọc `.env.local` — nên để trùng giá trị ở cả hai cho chắc):
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/thd_publishing?schema=public"
+DATABASE_URL="postgresql://postgres:MAT_KHAU@localhost:5432/thd_publishing"
+AUTH_SECRET="chuoi-ngau-nhien-dai"
+AUTH_GOOGLE_ID="..."
+AUTH_GOOGLE_SECRET="..."
+AUTH_FACEBOOK_ID="..."
+AUTH_FACEBOOK_SECRET="..."
+RESEND_API_KEY="re_..."
 ```
 
-Nếu chưa có PostgreSQL sẵn, có thể chạy nhanh bằng Docker:
+> Lưu ý Google/Facebook OAuth cần khai báo đúng **Redirect URI**:
+> `http://localhost:3000/api/auth/callback/google` và `.../facebook`.
+>
+> Resend ở gói miễn phí chỉ gửi được email tới đúng địa chỉ dùng đăng ký tài khoản Resend — cần xác minh domain riêng để gửi cho người dùng thật.
 
-```bash
-docker run --name thd-pg -e POSTGRES_PASSWORD=password -e POSTGRES_DB=thd_publishing -p 5432:5432 -d postgres
-```
-
-### 4. Chạy migration và seed dữ liệu mẫu
+### 3. Database
 
 ```bash
 npx prisma migrate dev
-npx prisma db seed
+npx tsx scripts/create-admin.ts <username> <mat_khau>
 ```
 
-Kiểm tra dữ liệu bằng Prisma Studio:
+Lệnh thứ hai tạo tài khoản quản trị đầu tiên (role `ADMIN`, đã xác thực sẵn, không cần qua email).
+
+### 4. Storage cho file upload
 
 ```bash
-npx prisma studio
+mkdir -p storage/covers storage/pdfs storage/avatars
 ```
 
-### 5. Chạy môi trường development
+Thư mục `storage/` nằm **ngoài** `public/`, không được truy cập trực tiếp — mọi file (ảnh bìa, PDF, avatar) được phục vụ qua `/api/files/...`, route này kiểm tra quyền (ấn phẩm phải `published`, phải `allowDownload` mới tải được PDF) trước khi trả file.
+
+### 5. Chạy
 
 ```bash
 npm run dev
 ```
 
-Sau đó mở:
+Mở `http://localhost:3000`. Đăng nhập quản trị tại `/login` bằng tài khoản vừa tạo, sau đó vào `/admin`.
 
-```text
-http://localhost:3000
-```
-
-## 📜 Các lệnh
+## 📜 Các lệnh thường dùng
 
 ```bash
-# Chạy development server
-npm run dev
+npm run dev            # Development server
+npm run build           # Build production
+npm run lint             # ESLint
 
-# Build production
-npm run build
-
-# Chạy production server
-npm run start
-
-# Kiểm tra ESLint
-npm run lint
-
-# Chạy migration Prisma
-npx prisma migrate dev
-
-# Seed dữ liệu mẫu
-npx prisma db seed
-
-# Mở giao diện xem/sửa dữ liệu
-npx prisma studio
+npx prisma migrate dev   # Tạo/áp dụng migration
+npx prisma studio        # Xem/sửa dữ liệu trực quan
+npx tsx scripts/create-admin.ts <user> <pass>   # Tạo/cập nhật tài khoản admin
 ```
+
+## 🔐 Xác thực & phân quyền
+
+- Một bảng `User` duy nhất cho mọi tài khoản — admin **không phải** hệ thống riêng, chỉ là `User` có `role = ADMIN`.
+- 3 cách đăng nhập: email/mật khẩu (`Credentials`, bắt buộc xác thực email trước khi đăng nhập được), Google, Facebook.
+- Tài khoản tạo qua Google/Facebook được tự sinh `username` duy nhất (vì schema bắt buộc có, nhưng Auth.js không cung cấp sẵn).
+- `middleware.ts` chặn toàn bộ `/admin/*` nếu session không có `role === ADMIN`, kiểm tra phía server (không chỉ ẩn nút ở giao diện).
+- Đăng ký ở `/register`, xác thực qua link gửi bằng Resend (`/verify`), hết hạn sau 24 giờ.
 
 ## 📰 Dữ liệu ấn phẩm
 
-Mỗi ấn phẩm được định nghĩa trong `prisma/schema.prisma` (model `Publication`), khớp với type gốc:
+Model `Publication` (xem đầy đủ tại `prisma/schema.prisma`) gồm: `title`, `subtitle`, `year`, `description`, `cover`, `pdf` (đường dẫn tương đối trong `storage/`), `pageCount`, `status` (`draft`/`published`/`archived`), `author`, `editor`, `language`, `publishedAt`, `allowDownload`, `allowPrint`, `allowShare`.
 
-```ts
-type Publication = {
-  id: string;
-  slug: string;
-  title: string;
-  subtitle: string;
-  year: number;
-  description: string;
-  cover: string;
-  pdf: string;
-  pageCount: number;
-  status: "draft" | "published" | "archived";
-  author: string;
-  editor: string;
-  language: string;
-  publishedAt: string;
-  allowDownload: boolean;
-  allowPrint: boolean;
-  allowShare: boolean;
-};
-```
-
-Trong Next.js, type này được suy ra tự động từ Prisma Client:
-
-```ts
-import type { Publication } from "@prisma/client";
-```
-
-Để thêm hoặc chỉnh sửa dữ liệu, dùng một trong các cách sau:
-
-- **Prisma Studio:** `npx prisma studio` — chỉnh trực tiếp qua giao diện.
-- **Seed script:** sửa `prisma/seed.ts` rồi chạy lại `npx prisma db seed`.
-- *(Sắp tới)* qua trang quản trị (admin) — xem phần "Định hướng phát triển".
-
-Thông tin chung của website nằm tại:
-
-```text
-src/data/site.ts
-```
-
-## 🧩 Thành phần chính
-
-### `PublicationCard`
-
-Hiển thị một ấn phẩm dưới dạng card, bao gồm:
-
-- Ảnh bìa.
-- Năm xuất bản.
-- Tiêu đề và phụ đề.
-- Mô tả rút gọn.
-- Số trang.
-- Liên kết xem ấn phẩm.
-
-### `SiteHeader` / `SiteNav`
-
-Cung cấp phần đầu trang và điều hướng chính:
-
-- Trang chủ
-- Thư viện
-- Tìm kiếm
-
-### `SiteFooter`
-
-Hiển thị thông tin nhà trường và bản quyền.
+Quản lý dữ liệu qua:
+- **Trang quản trị** (`/admin`) — cách chính thức, có validate + upload file.
+- **Prisma Studio** (`npx prisma studio`) — chỉ dùng khi dev, không dùng cho production.
 
 ## 🗺️ Định hướng phát triển
 
-Các hạng mục dự kiến cho những phiên bản tiếp theo:
-
-- [x] Tích hợp PostgreSQL.
-- [x] Tích hợp Prisma ORM.
-- [ ] **Xây dựng hệ thống quản trị (admin) cho ban biên tập** — đăng nhập, thêm/sửa/xoá ấn phẩm, quản lý trạng thái draft/published/archived.
-- [ ] Xây dựng API cho ấn phẩm (REST hoặc Server Actions).
-- [ ] Hoàn thiện trang thư viện `/publications`.
-- [ ] Hoàn thiện chức năng tìm kiếm `/search`.
-- [ ] Trang chi tiết cho từng ấn phẩm.
-- [ ] Hỗ trợ đọc PDF trực tiếp trên trình duyệt.
-- [ ] Quản lý quyền tải xuống, in và chia sẻ.
-- [ ] Upload và quản lý ảnh bìa/PDF (hiện đang dùng đường dẫn tĩnh trong `public/`).
-- [ ] Phân loại ấn phẩm theo năm, loại và chủ đề.
-- [ ] Tối ưu SEO và metadata.
-- [ ] Triển khai production.
+- [x] PostgreSQL + Prisma
+- [x] Thư viện, tìm kiếm, chi tiết ấn phẩm, reader PDF
+- [x] Hệ thống quản trị (đăng nhập, CRUD ấn phẩm, upload file thật)
+- [x] Kiểm tra quyền phía server (draft ẩn, tải xuống theo `allowDownload`)
+- [x] Tài khoản người dùng: đăng ký/xác thực email, Google/Facebook OAuth, hồ sơ cá nhân
+- [x] Thích (Like) ấn phẩm
+- [ ] Yêu thích (Favorite), Bình luận (Comment), Lịch sử đọc (Reading History)
+- [ ] Xác minh domain Resend để gửi email cho người dùng thật (không chỉ email test)
+- [ ] Đưa app Facebook ra khỏi chế độ Development (App Review)
+- [ ] Thiết kế lại giao diện bằng Tailwind CSS + shadcn/ui (dự kiến làm sau khi xong các tính năng còn lại)
+- [ ] Triển khai production (VPS + domain io.vn)
 
 ## 📌 Trạng thái hiện tại
 
-Tầng dữ liệu đã chuyển từ TypeScript tĩnh sang **PostgreSQL + Prisma**, trang chủ (`/`) đã đọc dữ liệu trực tiếp từ database qua Prisma Client.
-
-**Chưa hoàn thành:**
-- Hệ thống quản trị (admin) — hiện việc thêm/sửa dữ liệu chỉ làm được qua Prisma Studio hoặc chỉnh seed script, chưa có giao diện dành cho ban biên tập.
-- Các route `/publications`, `/search`, trang chi tiết ấn phẩm vẫn cần được triển khai đầy đủ.
-
-Đây là nền móng ban đầu cho hệ thống **thư viện ấn phẩm số của THPT A Trần Hưng Đạo**, không phải phiên bản production hoàn chỉnh.
+Phần lõi của sản phẩm — đọc, tìm kiếm, quản trị nội dung, tài khoản người dùng — đã hoạt động đầy đủ và được kiểm thử thủ công. Phần còn thiếu chủ yếu là tính năng tương tác xã hội mở rộng, polish giao diện, và triển khai lên server thật.
 
 ## 🤝 Đóng góp
 
-Nếu muốn đóng góp:
-
-1. Fork repository.
-2. Tạo branch mới:
-
-```bash
-git checkout -b feature/ten-tinh-nang
-```
-
-3. Thực hiện thay đổi.
-4. Chạy kiểm tra:
-
-```bash
-npm run lint
-npm run build
-```
-
-5. Commit và push branch.
-6. Tạo Pull Request.
+1. Fork repository, tạo nhánh mới: `git checkout -b feature/ten-tinh-nang`
+2. Thực hiện thay đổi, chạy `npm run lint && npm run build`
+3. Commit, push, tạo Pull Request
 
 ## 📄 License
 
-Repository hiện chưa khai báo một license riêng. Nếu dự án được phát hành công khai với mục đích cho phép tái sử dụng, nên bổ sung file `LICENSE` và lựa chọn license phù hợp.
+Repository hiện chưa khai báo license riêng.

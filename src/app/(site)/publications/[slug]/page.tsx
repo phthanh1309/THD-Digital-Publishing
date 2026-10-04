@@ -4,6 +4,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import ShareButton from "@/components/ShareButton";
+import { auth } from "@/lib/auth-nextauth";
+import LikeButton from "@/components/LikeButton";
 
 export default async function PublicationDetailPage({
   params,
@@ -11,11 +13,24 @@ export default async function PublicationDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const p = await prisma.publication.findFirst({
-    where: { slug, status: "published" },
-  });
+const found = await prisma.publication.findFirst({
+  where: { slug, status: "published" },
+});
 
-  if (!p) notFound();
+if (!found) notFound();
+const p = found;
+
+const session = await auth();
+const [likeCount, userLike] = await Promise.all([
+  prisma.like.count({ where: { publicationId: p.id } }),
+  session?.user?.id
+    ? prisma.like.findUnique({
+        where: {
+          userId_publicationId: { userId: session.user.id, publicationId: p.id },
+        },
+      })
+    : null,
+]);
 
   const readerParams = new URLSearchParams({
     title: p.title,
@@ -106,7 +121,13 @@ export default async function PublicationDetailPage({
                 Reader chưa khả dụng
               </span>
             )}
-
+            <LikeButton
+              publicationId={p.id}
+              slug={p.slug}
+              liked={!!userLike}
+              count={likeCount}
+              loggedIn={!!session?.user}
+            />
             {p.allowDownload && p.pdf && (
               <a className="button button--secondary" href={`/api/files/${p.pdf}?download=1`} download>
                 Tải xuống
