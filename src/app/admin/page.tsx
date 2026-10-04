@@ -49,7 +49,13 @@ export default async function AdminDashboard() {
           </nav>
 
           <div className="admin-account">
-            <form action="/admin/logout" method="post">
+            <form
+              action={async () => {
+                "use server";
+                const { signOut } = await import("@/lib/auth-nextauth");
+                await signOut({ redirectTo: "/login" });
+              }}
+            >
               <button type="submit" className="button button-secondary">
                 Đăng xuất
               </button>
