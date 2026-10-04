@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { site } from "@/data/site";
 import SiteNav from "./SiteNav";
+import { auth } from "@/lib/auth-nextauth";
 
-export default function SiteHeader() {
+export default async function SiteHeader() {
+  const session = await auth();
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -21,6 +23,13 @@ export default function SiteHeader() {
           </span>
         </Link>
         <SiteNav />
+        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          {session?.user ? (
+            <Link href="/profile">{session.user.name ?? "Tài khoản"}</Link>
+          ) : (
+            <Link href="/login">Đăng nhập</Link>
+          )}
+        </div>
       </div>
     </header>
   );

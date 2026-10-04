@@ -23,34 +23,39 @@ export async function GET(
     return new NextResponse("Không hợp lệ.", { status: 400 });
   }
 
-  const relativePath = segments.join("/"); // ví dụ: "covers/xxxx.jpg"
+  const relativePath = segments.join("/");
   const isPdf = relativePath.startsWith("pdfs/");
   const isCover = relativePath.startsWith("covers/");
+  const isAvatar = relativePath.startsWith("avatars/");
 
-  if (!isPdf && !isCover) {
+  if (!isPdf && !isCover && !isAvatar) {
     return new NextResponse("Không hợp lệ.", { status: 400 });
   }
 
-  // Tìm ấn phẩm sở hữu file này, để kiểm tra quyền.
-  const publication = await prisma.publication.findFirst({
-    where: isPdf ? { pdf: relativePath } : { cover: relativePath },
-  });
+  let isDownloadRequest = false;
+  let downloadName = "file";
 
-  if (!publication) {
-    return new NextResponse("Không tìm thấy file.", { status: 404 });
-  }
-
-  // Draft/archived: không ai xem được, kể cả cover.
-  if (publication.status !== "published") {
-    return new NextResponse("Không có quyền truy cập.", { status: 403 });
-  }
-
-  // Yêu cầu tải về (không phải chỉ xem trong reader) phải có allowDownload.
-  const isDownloadRequest = req.nextUrl.searchParams.get("download") === "1";
-  if (isPdf && isDownloadRequest && !publication.allowDownload) {
-    return new NextResponse("Ấn phẩm này không cho phép tải xuống.", {
-      status: 403,
+  if (!isAvatar) {
+    const publication = await prisma.publication.findFirst({
+      where: isPdf ? { pdf: relativePath } : { cover: relativePath },
     });
+
+    if (!publication) {
+      return new NextResponse("Không tìm thấy file.", { status: 404 });
+    }
+
+    if (publication.status !== "published") {
+      return new NextResponse("Không có quyền truy cập.", { status: 403 });
+    }
+
+    downloadName = publication.slug;
+
+    isDownloadRequest = req.nextUrl.searchParams.get("download") === "1";
+    if (isPdf && isDownloadRequest && !publication.allowDownload) {
+      return new NextResponse("Ấn phẩm này không cho phép tải xuống.", {
+        status: 403,
+      });
+    }
   }
 
   const filePath = path.join(STORAGE_ROOT, relativePath);
@@ -71,7 +76,7 @@ export async function GET(
         "Content-Length": String(fileStat.size),
         "Cache-Control": "public, max-age=3600",
         ...(isDownloadRequest
-          ? { "Content-Disposition": `attachment; filename="${publication.slug}${ext}"` }
+          ? { "Content-Disposition": `attachment; filename="${downloadName}${ext}"` }
           : {}),
       },
     });
