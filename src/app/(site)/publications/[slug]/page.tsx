@@ -9,6 +9,7 @@ import LikeButton from "@/components/LikeButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { toggleFavorite } from "./favorite-actions";
 import CommentSection from "@/components/CommentSection";
+import { recordReadingHistory } from "./history-actions";
 
 export default async function PublicationDetailPage({
   params,
@@ -22,6 +23,7 @@ const found = await prisma.publication.findFirst({
 
 if (!found) notFound();
 const p = found;
+recordReadingHistory(p.id).catch(() => {}); // chạy nền, không chờ, không chặn trang nếu lỗi
 
 const session = await auth();
 const [likeCount, userLike] = await Promise.all([

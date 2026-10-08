@@ -36,6 +36,7 @@ model Publication {
   likes Like[]
   favorites Favorite[]
   comments Comment[]
+  readingHistory ReadingHistory[]
 }
 
 enum Role {
@@ -61,6 +62,7 @@ model User {
   likes Like[]
   favorites Favorite[]
   comments Comment[]
+  readingHistory ReadingHistory[]
 }
 model Account {
   id                String  @id @default(cuid())
@@ -130,4 +132,15 @@ model Comment {
   publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   @@index([publicationId, createdAt])
+}
+model ReadingHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  publicationId String
+  lastReadAt    DateTime @default(now())
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, publicationId])
 }

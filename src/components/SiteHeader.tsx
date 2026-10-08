@@ -27,6 +27,7 @@ export default async function SiteHeader() {
           {session?.user ? (
             <>
               <Link href="/favorites">Đã lưu</Link>
+              <Link href="/history">Lịch sử</Link>
               <Link href="/profile">{session.user.name ?? "Tài khoản"}</Link>
             </>
           ) : (
