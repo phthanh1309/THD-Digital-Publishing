@@ -1,12 +1,15 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { updatePublication, deletePublication } from "../../actions";
+import { requireAdmin } from "@/lib/authorization";
 
 export default async function EditPublicationPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdmin();
+
   const { id } = await params;
   const p = await prisma.publication.findUnique({ where: { id } });
 
