@@ -2,27 +2,32 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth-nextauth";
+import { profileSchema, firstZodError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
 const STORAGE_ROOT = path.join(process.cwd(), "storage");
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
 export async function updateProfile(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) throw new Error("Chưa đăng nhập.");
 
-  const name = String(formData.get("name") ?? "").trim();
-  const bio = String(formData.get("bio") ?? "").trim();
-  const avatarFile = formData.get("avatarFile") as File | null;
+  const parsed = profileSchema.safeParse({
+    name: String(formData.get("name") ?? ""),
+    bio: String(formData.get("bio") ?? ""),
+  });
+  if (!parsed.success) throw new Error(firstZodError(parsed.error));
 
+  const avatarFile = formData.get("avatarFile") as File | null;
   let imagePath: string | undefined;
 
   if (avatarFile && avatarFile.size > 0) {
     if (avatarFile.size > MAX_AVATAR_SIZE) {
       throw new Error("Ảnh đại diện tối đa 5MB.");
     }
+
     const ext = path.extname(avatarFile.name).toLowerCase();
     if (![".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
       throw new Error("Chỉ chấp nhận ảnh jpg/png/webp.");
@@ -43,8 +48,8 @@ export async function updateProfile(formData: FormData) {
   await prisma.user.update({
     where: { id: session.user.id },
     data: {
-      name: name || undefined,
-      bio,
+      name: parsed.data.name || undefined,
+      bio: parsed.data.bio,
       ...(imagePath ? { image: imagePath } : {}),
     },
   });
