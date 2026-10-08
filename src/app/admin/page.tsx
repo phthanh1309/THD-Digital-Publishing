@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { deletePublication } from "./publications/actions";
+import { requireAdmin } from "@/lib/authorization";
 
 const statusLabel: Record<string, string> = {
   published: "Đã xuất bản",
@@ -19,6 +20,8 @@ function formatDateTime(d: Date) {
 }
 
 export default async function AdminDashboard() {
+  await requireAdmin();
+
   const publications = await prisma.publication.findMany({
     orderBy: { updatedAt: "desc" },
   });
