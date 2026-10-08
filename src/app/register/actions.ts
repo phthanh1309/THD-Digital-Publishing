@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { resend } from "@/lib/resend";
+import { registerSchema, firstZodError } from "@/lib/validation";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
@@ -9,16 +10,15 @@ export async function registerAction(
   _prevState: string,
   formData: FormData
 ): Promise<string> {
-  const username = String(formData.get("username") ?? "").trim();
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  const password = String(formData.get("password") ?? "");
+  const parsed = registerSchema.safeParse({
+    username: String(formData.get("username") ?? ""),
+    email: String(formData.get("email") ?? ""),
+    password: String(formData.get("password") ?? ""),
+  });
 
-  if (!username || !email || !password) {
-    return "Vui lòng điền đầy đủ thông tin.";
-  }
-  if (password.length < 8) {
-    return "Mật khẩu phải có ít nhất 8 ký tự.";
-  }
+  if (!parsed.success) return firstZodError(parsed.error);
+
+  const { username, email, password } = parsed.data;
 
   const existingUsername = await prisma.user.findUnique({ where: { username } });
   if (existingUsername) return "Tên đăng nhập đã được sử dụng.";
@@ -33,7 +33,7 @@ export async function registerAction(
   });
 
   const token = crypto.randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 giờ
+  const expires = new Date(Date.now() + 1000 * 60 * 60 * 24);
 
   await prisma.verificationToken.create({
     data: { identifier: email, token, expires },
@@ -41,14 +41,22 @@ export async function registerAction(
 
   const verifyUrl = `${process.env.APP_URL ?? "http://localhost:3000"}/verify?token=${token}&email=${encodeURIComponent(email)}`;
 
+  const safeUsername = username.replace(/[&<>"']/g, (char) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  })[char]!);
+
   await resend.emails.send({
     from: "THD Digital Publishing <onboarding@resend.dev>",
     to: email,
     subject: "Xác thực tài khoản - Thư viện Ấn phẩm số",
     html: `
-      <p>Chào ${username},</p>
+      <p>Chào ${safeUsername},</p>
       <p>Bấm vào liên kết dưới đây để xác thực tài khoản (hết hạn sau 24 giờ):</p>
-      <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+      <p><a href="${verifyUrl}">Xác thực tài khoản</a></p>
     `,
   });
 
