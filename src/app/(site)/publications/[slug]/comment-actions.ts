@@ -2,9 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth-nextauth";
+import { commentSchema, firstZodError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
-
-const MAX_LENGTH = 1000;
 
 export async function createComment(
   publicationId: string,
@@ -16,14 +15,23 @@ export async function createComment(
     throw new Error("Vui lòng đăng nhập để bình luận.");
   }
 
-  const content = String(formData.get("content") ?? "").trim();
-  if (!content) throw new Error("Bình luận không được để trống.");
-  if (content.length > MAX_LENGTH) {
-    throw new Error(`Bình luận tối đa ${MAX_LENGTH} ký tự.`);
-  }
+  const parsed = commentSchema.safeParse({
+    content: String(formData.get("content") ?? ""),
+  });
+  if (!parsed.success) throw new Error(firstZodError(parsed.error));
+
+  const publication = await prisma.publication.findFirst({
+    where: { id: publicationId, slug, status: "published" },
+    select: { id: true },
+  });
+  if (!publication) throw new Error("Không tìm thấy ấn phẩm.");
 
   await prisma.comment.create({
-    data: { content, userId: session.user.id, publicationId },
+    data: {
+      content: parsed.data.content,
+      userId: session.user.id,
+      publicationId: publication.id,
+    },
   });
 
   revalidatePath(`/publications/${slug}`);
