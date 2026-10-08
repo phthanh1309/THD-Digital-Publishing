@@ -1,6 +1,8 @@
 import { createPublication } from "../actions";
+import { requireAdmin } from "@/lib/authorization";
 
-export default function NewPublicationPage() {
+export default async function NewPublicationPage() {
+  await requireAdmin();
   return (
     <main className="admin-main">
       <header className="admin-page-header">
