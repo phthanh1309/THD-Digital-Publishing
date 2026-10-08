@@ -1,6 +1,7 @@
 import { signIn } from "@/lib/auth-nextauth";
 import "../admin/admin.css";
 import Link from "next/link";
+import { loginSchema, firstZodError } from "@/lib/validation";
 
 export default function LoginPage({
   searchParams,
@@ -23,9 +24,18 @@ export default function LoginPage({
             className="admin-login-form"
             action={async (formData) => {
               "use server";
+              const parsed = loginSchema.safeParse({
+                username: String(formData.get("username") ?? ""),
+                password: String(formData.get("password") ?? ""),
+              });
+
+              if (!parsed.success) {
+                throw new Error(firstZodError(parsed.error));
+              }
+
               await signIn("credentials", {
-                username: formData.get("username"),
-                password: formData.get("password"),
+                username: parsed.data.username,
+                password: parsed.data.password,
                 redirectTo: "/",
               });
             }}
