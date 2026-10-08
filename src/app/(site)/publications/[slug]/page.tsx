@@ -8,6 +8,7 @@ import { auth } from "@/lib/auth-nextauth";
 import LikeButton from "@/components/LikeButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { toggleFavorite } from "./favorite-actions";
+import CommentSection from "@/components/CommentSection";
 
 export default async function PublicationDetailPage({
   params,
@@ -41,6 +42,12 @@ const userFavorite = session?.user?.id
         },
       })
     : null;
+
+const comments = await prisma.comment.findMany({
+  where: { publicationId: p.id },
+  orderBy: { createdAt: "desc" },
+  include: { user: { select: { name: true, username: true, image: true } } },
+});
 
   const readerParams = new URLSearchParams({
     title: p.title,
@@ -189,6 +196,13 @@ const userFavorite = session?.user?.id
           </div>
         </section>
       )}
+      <CommentSection
+        publicationId={p.id}
+        slug={p.slug}
+        comments={comments}
+        currentUserId={session?.user?.id}
+        isAdmin={(session?.user as { role?: string } | undefined)?.role === "ADMIN"}
+      />
     </article>
   );
 }
