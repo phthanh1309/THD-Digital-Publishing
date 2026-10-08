@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export const loginSchema = z.object({
+  username: z.string().trim().min(1, "Vui lòng nhập tên đăng nhập.").max(30, "Tên đăng nhập tối đa 30 ký tự."),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu.").max(72, "Mật khẩu tối đa 72 ký tự."),
+});
+
 export const registerSchema = z.object({
   username: z
     .string()
