@@ -2,24 +2,22 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { toggleLike } from "@/app/(site)/publications/[slug]/like-actions";
 
-export default function LikeButton({
+export default function FavoriteButton({
   publicationId,
   slug,
-  liked,
-  count,
+  action,
+  initialSaved,
   loggedIn,
 }: {
   publicationId: string;
   slug: string;
-  liked: boolean;
-  count: number;
+  action: (publicationId: string, slug: string) => Promise<void>;
+  initialSaved: boolean;
   loggedIn: boolean;
 }) {
   const router = useRouter();
-  const [localLiked, setLocalLiked] = useState(liked);
-  const [localCount, setLocalCount] = useState(count);
+  const [saved, setSaved] = useState(initialSaved);
   const [isPending, startTransition] = useTransition();
 
   function handleClick() {
@@ -27,10 +25,9 @@ export default function LikeButton({
       router.push("/login");
       return;
     }
-    setLocalLiked((v) => !v);
-    setLocalCount((c) => (localLiked ? c - 1 : c + 1));
+    setSaved((v) => !v); // optimistic: đổi UI ngay, không chờ server
     startTransition(() => {
-      toggleLike(publicationId, slug);
+      action(publicationId, slug);
     });
   }
 
@@ -41,7 +38,7 @@ export default function LikeButton({
       disabled={isPending}
       className="button button--secondary"
     >
-      {localLiked ? "❤️ Đã thích" : "🤍 Thích"} ({localCount})
+      {saved ? "⭐ Đã lưu" : "☆ Lưu ấn phẩm"}
     </button>
   );
 }

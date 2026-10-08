@@ -25,7 +25,10 @@ export default async function SiteHeader() {
         <SiteNav />
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           {session?.user ? (
-            <Link href="/profile">{session.user.name ?? "Tài khoản"}</Link>
+            <>
+              <Link href="/favorites">Đã lưu</Link>
+              <Link href="/profile">{session.user.name ?? "Tài khoản"}</Link>
+            </>
           ) : (
             <Link href="/login">Đăng nhập</Link>
           )}

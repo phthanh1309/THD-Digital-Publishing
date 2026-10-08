@@ -6,6 +6,8 @@ import { formatDate } from "@/lib/utils";
 import ShareButton from "@/components/ShareButton";
 import { auth } from "@/lib/auth-nextauth";
 import LikeButton from "@/components/LikeButton";
+import FavoriteButton from "@/components/FavoriteButton";
+import { toggleFavorite } from "./favorite-actions";
 
 export default async function PublicationDetailPage({
   params,
@@ -31,6 +33,14 @@ const [likeCount, userLike] = await Promise.all([
       })
     : null,
 ]);
+
+const userFavorite = session?.user?.id
+    ? await prisma.favorite.findUnique({
+        where: {
+          userId_publicationId: { userId: session.user.id, publicationId: p.id },
+        },
+      })
+    : null;
 
   const readerParams = new URLSearchParams({
     title: p.title,
@@ -128,6 +138,15 @@ const [likeCount, userLike] = await Promise.all([
               count={likeCount}
               loggedIn={!!session?.user}
             />
+
+            <FavoriteButton
+              publicationId={p.id}
+              slug={p.slug}
+              action={toggleFavorite}
+              initialSaved={!!userFavorite}
+              loggedIn={!!session?.user}
+            />
+
             {p.allowDownload && p.pdf && (
               <a className="button button--secondary" href={`/api/files/${p.pdf}?download=1`} download>
                 Tải xuống
