@@ -2,204 +2,514 @@
 
 **Thư viện Ấn phẩm số — THPT A Trần Hưng Đạo**
 
-Một nền tảng web để giới thiệu và quản lý thư viện **tập san, kỷ yếu và các ấn phẩm số** của THPT A Trần Hưng Đạo. Người đọc có thể khám phá, tìm kiếm, đọc trực tuyến (flipbook) và tương tác (thích) với ấn phẩm; ban biên tập quản lý toàn bộ nội dung qua khu vực quản trị riêng.
+Nền tảng web để giới thiệu, đọc và quản lý **tập san, kỷ yếu và các ấn phẩm số** của THPT A Trần Hưng Đạo.
 
-> **Trạng thái:** Đang phát triển tích cực. Các tính năng cốt lõi (đọc, tìm kiếm, quản trị, tài khoản người dùng) đã hoạt động. Đang mở rộng thêm tương tác xã hội (Like/Comment/Favorite/Reading History) và sẽ làm lại giao diện bằng Tailwind CSS ở giai đoạn cuối.
-
-## ✨ Tổng quan
-
-- Khám phá, tìm kiếm ấn phẩm theo tên/tác giả/năm, sắp xếp và phân trang.
-- Trang chi tiết: bìa, mô tả, tác giả, biên tập, ngày xuất bản, số trang.
-- Đọc trực tuyến bằng flipbook 3D (3DFlipBook + pdf.js), hỗ trợ tải xuống/in theo quyền từng ấn phẩm.
-- Tài khoản người dùng: đăng ký bằng email (có xác thực qua mail), hoặc đăng nhập bằng Google/Facebook. Mỗi người có trang hồ sơ (tên, giới thiệu, ảnh đại diện).
-- Người dùng đã đăng nhập có thể **thích** ấn phẩm.
-- Khu vực quản trị (`/admin`) dành riêng cho tài khoản có vai trò `ADMIN`: thêm/sửa/xóa ấn phẩm, upload ảnh bìa + file PDF thật, quản lý trạng thái draft/published/archived và quyền tải xuống/in/chia sẻ.
-- Ấn phẩm ở trạng thái draft/archived **không** hiển thị ở bất kỳ trang công khai nào.
-
-## 🛠️ Công nghệ
-
-| Công nghệ | Vai trò |
-| --- | --- |
-| [Next.js](https://nextjs.org/) 16 (App Router) | Framework React, Server Actions, Route Handlers |
-| [React](https://react.dev/) 19 | Giao diện |
-| TypeScript | Kiểu dữ liệu, an toàn khi phát triển |
-| **PostgreSQL** | Cơ sở dữ liệu chính |
-| **Prisma ORM 6** | Schema, migration, truy vấn database |
-| **Auth.js (next-auth@beta)** | Xác thực: Credentials (email+mật khẩu), Google OAuth, Facebook OAuth |
-| **Resend** | Gửi email xác thực tài khoản |
-| **bcryptjs** | Băm mật khẩu |
-| CSS thuần | Styling (kế thừa từ bản thiết kế gốc; sẽ chuyển sang Tailwind CSS ở giai đoạn sau) |
-| 3DFlipBook, pdf.js, three.js | Reader đọc PDF dạng lật trang |
-
-> ⚠️ Dự án cố định dùng **Prisma 6.x** (ổn định), không dùng Prisma 7/8 (đang major update). Bỏ qua cảnh báo "Update available" khi chạy lệnh Prisma.
-
-## 📁 Cấu trúc dự án (rút gọn)
-
-```text
-thd-publishing/
-├── public/
-│   ├── logo.webp
-│   ├── reader.html              # Trang đọc flipbook (tĩnh, không qua layout Next.js)
-│   └── assets/                  # Thư viện flipbook (jQuery, three.js, pdf.js...)
-│
-├── storage/                     # File thật: covers/, pdfs/, avatars/ — KHÔNG public trực tiếp
-│                                 # (phục vụ qua /api/files/..., có kiểm tra quyền)
-│
-├── prisma/
-│   └── schema.prisma             # User, Account, Session, VerificationToken,
-│                                  # Publication, Like...
-│
-├── scripts/
-│   └── create-admin.ts           # Tạo/cập nhật tài khoản ADMIN đầu tiên
-│
-├── src/
-│   ├── middleware.ts              # Bảo vệ /admin/* bằng Auth.js (role === ADMIN)
-│   ├── lib/
-│   │   ├── prisma.ts
-│   │   ├── auth-nextauth.ts       # Cấu hình Auth.js (providers, callbacks)
-│   │   ├── auth-adapter.ts        # Adapter tùy chỉnh: tự sinh username cho tài khoản OAuth
-│   │   └── resend.ts
-│   ├── components/
-│   │   ├── PublicationCard.tsx
-│   │   ├── SiteHeader.tsx / SiteFooter.tsx / SiteNav.tsx
-│   │   ├── LikeButton.tsx
-│   │   └── ShareButton.tsx
-│   └── app/
-│       ├── (site)/                # Toàn bộ trang công khai, có SiteHeader/Footer riêng
-│       │   ├── layout.tsx
-│       │   ├── page.tsx                      # Trang chủ
-│       │   ├── publications/page.tsx         # Thư viện (lọc/sắp xếp/phân trang)
-│       │   ├── publications/[slug]/page.tsx  # Chi tiết ấn phẩm + Like + reader
-│       │   └── search/page.tsx
-│       ├── login/page.tsx          # Đăng nhập chung (user & admin), Google/Facebook
-│       ├── register/page.tsx       # Đăng ký email + mật khẩu
-│       ├── verify/page.tsx         # Xác thực email qua link gửi bằng Resend
-│       ├── profile/page.tsx        # Hồ sơ cá nhân (tên, bio, avatar)
-│       ├── admin/                  # Khu vực quản trị, bảo vệ bởi middleware
-│       │   ├── layout.tsx          # CSS + layout riêng cho admin, không có header công khai
-│       │   ├── page.tsx            # Dashboard: thống kê + danh sách ấn phẩm
-│       │   └── publications/
-│       │       ├── actions.ts      # Server Actions: tạo/sửa/xóa, upload file
-│       │       ├── new/page.tsx
-│       │       └── [id]/edit/page.tsx
-│       └── api/
-│           ├── auth/[...nextauth]/route.ts
-│           └── files/[...path]/route.ts   # Phục vụ file từ storage/, có kiểm tra quyền
-```
-
-## 🚀 Bắt đầu
-
-### Yêu cầu
-
-- Node.js 20+, npm
-- PostgreSQL (cài local hoặc Docker)
-- Tài khoản Resend (gửi email xác thực)
-- Google Cloud OAuth Client + Meta for Developers App (đăng nhập Google/Facebook)
-
-### 1. Cài đặt
-
-```bash
-git clone https://github.com/phthanh1309/THD-Digital-Publishing.git
-cd THD-Digital-Publishing
-npm install
-```
-
-### 2. Cấu hình môi trường
-
-Tạo **cả hai** file `.env` và `.env.local` ở thư mục gốc (Prisma CLI đọc `.env`, Next.js đọc `.env.local` — nên để trùng giá trị ở cả hai cho chắc):
-
-```env
-DATABASE_URL="postgresql://postgres:MAT_KHAU@localhost:5432/thd_publishing"
-AUTH_SECRET="chuoi-ngau-nhien-dai"
-AUTH_GOOGLE_ID="..."
-AUTH_GOOGLE_SECRET="..."
-AUTH_FACEBOOK_ID="..."
-AUTH_FACEBOOK_SECRET="..."
-RESEND_API_KEY="re_..."
-```
-
-> Lưu ý Google/Facebook OAuth cần khai báo đúng **Redirect URI**:
-> `http://localhost:3000/api/auth/callback/google` và `.../facebook`.
+> **Branch đang phát triển:** `whisle`
 >
-> Resend ở gói miễn phí chỉ gửi được email tới đúng địa chỉ dùng đăng ký tài khoản Resend — cần xác minh domain riêng để gửi cho người dùng thật.
+> **Mục đích README này:** tài liệu handoff để Claude/AI khác tiếp tục phát triển project từ đúng trạng thái hiện tại, không làm lại những phần đã hoàn thành.
 
-### 3. Database
+---
 
-```bash
-npx prisma migrate dev
-npx tsx scripts/create-admin.ts <username> <mat_khau>
-```
+## 🚦 TRẠNG THÁI HIỆN TẠI — 2026-10
 
-Lệnh thứ hai tạo tài khoản quản trị đầu tiên (role `ADMIN`, đã xác thực sẵn, không cần qua email).
-
-### 4. Storage cho file upload
-
-```bash
-mkdir -p storage/covers storage/pdfs storage/avatars
-```
-
-Thư mục `storage/` nằm **ngoài** `public/`, không được truy cập trực tiếp — mọi file (ảnh bìa, PDF, avatar) được phục vụ qua `/api/files/...`, route này kiểm tra quyền (ấn phẩm phải `published`, phải `allowDownload` mới tải được PDF) trước khi trả file.
-
-### 5. Chạy
-
-```bash
-npm run dev
-```
-
-Mở `http://localhost:3000`. Đăng nhập quản trị tại `/login` bằng tài khoản vừa tạo, sau đó vào `/admin`.
-
-## 📜 Các lệnh thường dùng
-
-```bash
-npm run dev            # Development server
-npm run build           # Build production
-npm run lint             # ESLint
-
-npx prisma migrate dev   # Tạo/áp dụng migration
-npx prisma studio        # Xem/sửa dữ liệu trực quan
-npx tsx scripts/create-admin.ts <user> <pass>   # Tạo/cập nhật tài khoản admin
-```
-
-## 🔐 Xác thực & phân quyền
-
-- Một bảng `User` duy nhất cho mọi tài khoản — admin **không phải** hệ thống riêng, chỉ là `User` có `role = ADMIN`.
-- 3 cách đăng nhập: email/mật khẩu (`Credentials`, bắt buộc xác thực email trước khi đăng nhập được), Google, Facebook.
-- Tài khoản tạo qua Google/Facebook được tự sinh `username` duy nhất (vì schema bắt buộc có, nhưng Auth.js không cung cấp sẵn).
-- `middleware.ts` chặn toàn bộ `/admin/*` nếu session không có `role === ADMIN`, kiểm tra phía server (không chỉ ẩn nút ở giao diện).
-- Đăng ký ở `/register`, xác thực qua link gửi bằng Resend (`/verify`), hết hạn sau 24 giờ.
-
-## 📰 Dữ liệu ấn phẩm
-
-Model `Publication` (xem đầy đủ tại `prisma/schema.prisma`) gồm: `title`, `subtitle`, `year`, `description`, `cover`, `pdf` (đường dẫn tương đối trong `storage/`), `pageCount`, `status` (`draft`/`published`/`archived`), `author`, `editor`, `language`, `publishedAt`, `allowDownload`, `allowPrint`, `allowShare`.
-
-Quản lý dữ liệu qua:
-- **Trang quản trị** (`/admin`) — cách chính thức, có validate + upload file.
-- **Prisma Studio** (`npx prisma studio`) — chỉ dùng khi dev, không dùng cho production.
-
-## 🗺️ Định hướng phát triển
+### Đã hoàn thành
 
 - [x] PostgreSQL + Prisma
-- [x] Thư viện, tìm kiếm, chi tiết ấn phẩm, reader PDF
-- [x] Hệ thống quản trị (đăng nhập, CRUD ấn phẩm, upload file thật)
-- [x] Kiểm tra quyền phía server (draft ẩn, tải xuống theo `allowDownload`)
-- [x] Tài khoản người dùng: đăng ký/xác thực email, Google/Facebook OAuth, hồ sơ cá nhân
-- [x] Thích (Like) ấn phẩm
-- [ ] Yêu thích (Favorite), Bình luận (Comment), Lịch sử đọc (Reading History)
-- [ ] Xác minh domain Resend để gửi email cho người dùng thật (không chỉ email test)
-- [ ] Đưa app Facebook ra khỏi chế độ Development (App Review)
-- [ ] Thiết kế lại giao diện bằng Tailwind CSS + shadcn/ui (dự kiến làm sau khi xong các tính năng còn lại)
-- [ ] Triển khai production (VPS + domain io.vn)
+- [x] Public homepage / publication library
+- [x] Search, filter, sort, pagination
+- [x] Publication detail
+- [x] PDF reader / flipbook
+- [x] Admin CMS
+- [x] Publication CRUD
+- [x] Upload cover/PDF
+- [x] Publication status: `draft` / `published` / `archived`
+- [x] Download / print / share permission theo publication
+- [x] Auth.js / NextAuth unified authentication
+- [x] Một bảng `User` duy nhất cho USER + ADMIN
+- [x] Role-based access: `USER` / `ADMIN`
+- [x] Credentials login
+- [x] Google OAuth
+- [x] Facebook OAuth
+- [x] Email verification qua Resend
+- [x] User profile: name / bio / avatar
+- [x] Like
+- [x] Favorite
+- [x] Comment
+- [x] Reading History
+- [x] Zod validation cho các luồng chính
+- [x] Server-side ADMIN authorization cho admin dashboard/publication CRUD
+- [x] Dọn file cover/PDF cũ khi thay thế/xóa publication
 
-## 📌 Trạng thái hiện tại
+### Chưa làm / đang chờ
 
-Phần lõi của sản phẩm — đọc, tìm kiếm, quản trị nội dung, tài khoản người dùng — đã hoạt động đầy đủ và được kiểm thử thủ công. Phần còn thiếu chủ yếu là tính năng tương tác xã hội mở rộng, polish giao diện, và triển khai lên server thật.
+- [ ] Kiểm tra `npm run lint` + `npm run build` sau đợt Zod/RBAC mới
+- [ ] Rà soát toàn bộ Server Actions/API để validation + authorization đồng nhất
+- [ ] Hoàn thiện UI redesign
+- [ ] Tailwind CSS
+- [ ] shadcn/ui
+- [ ] Lucide
+- [ ] React Bits — chỉ dùng effect phù hợp, không lạm dụng animation
+- [ ] Xác minh domain Resend
+- [ ] Facebook App Review
+- [ ] Deploy production
+- [ ] Redis — **không bắt buộc**, chỉ thêm nếu deploy thực tế chứng minh cần cache/rate-limit/performance
 
-## 🤝 Đóng góp
+---
 
-1. Fork repository, tạo nhánh mới: `git checkout -b feature/ten-tinh-nang`
-2. Thực hiện thay đổi, chạy `npm run lint && npm run build`
-3. Commit, push, tạo Pull Request
+# 🧭 ROADMAP ĐÃ CHỐT
 
-## 📄 License
+## 1. Like / Favorite / Comment / Reading History
 
-Repository hiện chưa khai báo license riêng.
+**Trạng thái: ✅ XONG**
+
+Không làm lại các tính năng này trừ khi phát hiện bug khi test.
+
+## 2. Zod
+
+**Trạng thái: 🟢 Đã triển khai phần lõi**
+
+Shared validation:
+
+`src/lib/validation.ts`
+
+Schema hiện có:
+
+- `loginSchema`
+- `registerSchema`
+- `profileSchema`
+- `commentSchema`
+- `publicationSchema`
+- `parsePublicationForm()`
+- `firstZodError()`
+
+Đã áp dụng vào:
+
+- Register
+- Login
+- Profile
+- Comment
+- Admin Create Publication
+- Admin Edit Publication
+
+### Việc còn lại của Zod
+
+Rà soát thêm các input/action/API nếu cần.
+
+> **Server-side validation là bắt buộc. Frontend validation chỉ để UX, không phải security boundary.**
+
+Không tạo schema trùng lặp nếu đã có schema dùng chung.
+
+---
+
+# 🔐 AUTHENTICATION & AUTHORIZATION
+
+Project đã chuyển từ custom admin auth sang:
+
+`Auth.js → User → Role`
+
+- `USER`
+- `ADMIN`
+
+**Không tạo lại hệ thống Admin riêng.**
+
+### Auth
+
+File chính:
+
+`src/lib/auth-nextauth.ts`
+`src/lib/auth-adapter.ts`
+`src/app/api/auth/[...nextauth]/route.ts`
+`src/middleware.ts`
+
+Providers:
+
+- Credentials
+- Google
+- Facebook
+
+Credentials yêu cầu email đã được verify.
+
+### Authorization
+
+Middleware bảo vệ `/admin/*`.
+
+Ngoài middleware còn có:
+
+`src/lib/authorization.ts`
+
+`requireAdmin()` kiểm tra session và **đọc role trực tiếp từ database**.
+
+Admin Server Actions phải tự kiểm tra quyền, không được chỉ dựa vào frontend/middleware.
+
+---
+
+# 🗄️ DATABASE
+
+Stack:
+
+- PostgreSQL
+- Prisma 6.x
+
+> **QUAN TRỌNG:** Project cố định dùng **Prisma 6.x**. `prisma` và `@prisma/client` phải cùng major version. Không tự nâng lên Prisma 7/8.
+
+Các model chính:
+
+`User
+Account
+Session
+VerificationToken
+Publication
+Like
+Favorite
+Comment
+ReadingHistory`
+
+### User
+
+Một bảng User duy nhất:
+
+`Role:
+  USER
+  ADMIN`
+
+### Publication
+
+Status:
+
+`draft
+published
+archived`
+
+Draft/archived không được hiển thị công khai.
+
+### Social features
+
+- Like: unique `userId + publicationId`
+- Favorite: unique `userId + publicationId`
+- ReadingHistory: unique `userId + publicationId`
+- Comment: user + publication + content
+
+---
+
+# 📁 STORAGE
+
+File local:
+
+`storage/
+├── covers/
+├── pdfs/
+└── avatars/`
+
+Không đặt file upload trực tiếp trong `public/`.
+
+File được phục vụ qua:
+
+`/api/files/[...path]`
+
+Production sau này có thể chuyển sang object storage nếu cần.
+
+**Không tự ý đưa Redis/object storage vào chỉ vì muốn stack hiện đại.**
+
+---
+
+# 🎨 UI — GIAI ĐOẠN TIẾP THEO
+
+Đây là bước lớn tiếp theo sau khi xác nhận build/lint ổn.
+
+## Stack UI
+
+- Tailwind CSS
+- shadcn/ui
+- Lucide
+- React Bits — chọn lọc
+
+### Nguyên tắc
+
+Không rewrite backend/auth/database chỉ để redesign UI.
+
+Giữ nhận diện THD hiện tại, nhưng làm UI:
+
+- responsive
+- hiện đại
+- accessible
+- consistent
+- mobile-friendly
+- loading/error state rõ ràng
+
+### shadcn/ui
+
+Ưu tiên cho:
+
+- Button
+- Input
+- Select
+- Dialog
+- Dropdown
+- Tabs
+- Card
+- Toast
+- Form-related UI
+- Admin dashboard
+
+### React Bits
+
+Chỉ dùng cho:
+
+- Hero
+- Card hover
+- Landing visual
+- Một số transition
+
+Không lạm dụng animation trong:
+
+- PDF reader
+- Admin CRUD
+- Login/Register
+- Form
+- Accessibility-sensitive areas
+
+---
+
+# 📨 VIỆC HÀNH CHÍNH
+
+Có thể làm xen kẽ, không cần chặn development.
+
+## Resend
+
+Đang dùng Resend để gửi email verification.
+
+Còn lại:
+
+- verify domain thật
+- đổi sender khỏi `onboarding@resend.dev`
+- kiểm tra email production
+
+## Facebook
+
+Facebook OAuth đã tích hợp.
+
+Còn lại:
+
+- hoàn thiện App Review
+- chuyển app khỏi Development khi đủ điều kiện
+
+---
+
+# ⚡ REDIS
+
+**KHÔNG BẮT BUỘC.**
+
+Chỉ thêm Redis nếu sau khi deploy thật phát hiện:
+
+- response chậm
+- database query quá nhiều
+- cần caching
+- cần rate limiting
+- cần counter/temporary state
+
+Không thêm Redis trước chỉ để “đủ công nghệ”.
+
+PostgreSQL vẫn là source of truth.
+
+---
+
+# 🚀 DEPLOY
+
+Deploy sau khi:
+
+1. Zod/RBAC ổn
+2. UI redesign hoàn thành
+3. Resend production config
+4. OAuth production config
+5. build/lint/test ổn
+
+Mục tiêu:
+
+- domain thật
+- HTTPS
+- PostgreSQL production
+- storage phù hợp production
+- environment variables production
+- backup database
+- monitoring nếu cần
+
+---
+
+# 🧰 TECH STACK
+
+| Công nghệ | Vai trò |
+|---|---|
+| Next.js 16 | App Router, Server Actions, Route Handlers |
+| React 19 | UI |
+| TypeScript | Type safety |
+| PostgreSQL | Database |
+| Prisma 6 | ORM |
+| Auth.js / next-auth beta | Authentication |
+| bcryptjs | Password hashing |
+| Resend | Email verification |
+| Zod | Server-side validation |
+| Tailwind CSS | UI styling — sắp triển khai |
+| shadcn/ui | UI components — sắp triển khai |
+| Lucide | Icons — sắp triển khai |
+| React Bits | Chọn lọc visual effects |
+| 3DFlipBook / pdf.js / three.js | PDF reader |
+
+---
+
+# 📂 CẤU TRÚC QUAN TRỌNG
+
+`src/
+├── app/
+│   ├── (site)/
+│   ├── login/
+│   ├── register/
+│   ├── verify/
+│   ├── profile/
+│   ├── admin/
+│   │   ├── page.tsx
+│   │   └── publications/
+│   └── api/
+│
+├── components/
+│
+└── lib/
+    ├── prisma.ts
+    ├── auth-nextauth.ts
+    ├── auth-adapter.ts
+    ├── authorization.ts
+    ├── validation.ts
+    └── resend.ts
+
+prisma/
+└── schema.prisma
+
+storage/
+├── covers/
+├── pdfs/
+└── avatars/`
+
+---
+
+# 🤖 QUY TẮC CHO AI TIẾP TỤC PROJECT
+
+### 1. Không làm lại tính năng đã xong
+
+Đặc biệt:
+
+- Auth.js
+- User/Role
+- Like
+- Favorite
+- Comment
+- Reading History
+
+Trước khi sửa, kiểm tra code hiện tại.
+
+### 2. Không tạo hệ thống auth thứ hai
+
+Không quay lại custom admin session.
+
+Kiến trúc chuẩn:
+
+`Auth.js → User → Role`
+
+### 3. Không thêm Redis ngay
+
+Chỉ thêm khi có lý do từ production.
+
+### 4. Không nâng Prisma major tự ý
+
+Giữ Prisma 6.x và đồng bộ:
+
+`prisma`
+`@prisma/client`
+
+### 5. Server là security boundary
+
+Mutation quan trọng phải đi theo:
+
+`session
+↓
+user
+↓
+role / ownership
+↓
+validation
+↓
+database mutation`
+
+### 6. Không rewrite toàn project khi làm UI
+
+UI redesign không được làm mất logic đang hoạt động.
+
+### 7. Sau mỗi nhóm thay đổi
+
+Chạy:
+
+`npm run lint`
+`npm run build`
+
+Nếu có lỗi, sửa trước khi tiếp tục feature mới.
+
+---
+
+# 📌 VIỆC CẦN LÀM NGAY
+
+`NOW
+ ↓
+1. npm run lint
+ ↓
+2. npm run build
+ ↓
+3. Fix mọi lỗi TypeScript/runtime
+ ↓
+4. Rà soát Zod + server authorization
+ ↓
+5. Tailwind + shadcn + Lucide + React Bits
+ ↓
+6. Resend domain / Facebook App Review (làm xen kẽ)
+ ↓
+7. Deploy
+ ↓
+8. Quan sát production
+ ↓
+9. Redis nếu thực sự cần`
+
+**Không nhảy thẳng vào Redis.**
+
+---
+
+# 📝 DEVELOPMENT COMMANDS
+
+`npm install
+npm run dev
+
+npm run lint
+npm run build
+
+npx prisma migrate dev
+npx prisma studio
+
+npx tsx scripts/create-admin.ts <username> <password>`
+
+---
+
+## ⚠️ HANDOFF NOTE
+
+README này được cập nhật trực tiếp trên branch **`whisle`** sau khi tiếp quản phần việc còn dang dở.
+
+Nếu Claude tiếp tục từ đây:
+
+> **Coi `whisle` là source of truth hiện tại.**
+
+Không dựa vào README cũ hoặc branch cũ để kết luận trạng thái project.
+
+Trước task mới:
+
+`git status
+git branch
+git log --oneline -10
+npm run lint
+npm run build`
+
+Sau đó mới bắt đầu task tiếp theo.
