@@ -1,7 +1,15 @@
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
 export function excerpt(text: string, max: number): string {
   const clean = text.replace(/\s+/g, " ").trim();
   return clean.length <= max ? clean : clean.slice(0, max).trimEnd() + "…";
 }
+
 export function formatDate(iso: string): string {
   if (!iso) return "";
   const d = new Date(iso);
