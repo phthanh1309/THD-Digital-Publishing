@@ -3,62 +3,83 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import { registerAction } from "./actions";
-import "../admin/admin.css";
+import "../tailwind.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 export default function RegisterPage() {
   const [message, formAction, pending] = useActionState(registerAction, "");
 
   if (message === "SUCCESS") {
     return (
-      <div className="admin-login-page">
-        <main className="admin-login">
-          <section className="admin-login-card">
-            <h1>Kiểm tra email của bạn</h1>
-            <p>Mình đã gửi liên kết xác thực. Bấm vào liên kết trong email để kích hoạt tài khoản.</p>
-            <Link href="/login">← Quay lại đăng nhập</Link>
-          </section>
-        </main>
+      <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader>
+            <CardTitle>Kiểm tra email của bạn</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Mình đã gửi liên kết xác thực. Bấm vào liên kết trong email để
+              kích hoạt tài khoản.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Link href="/login" className="text-sm hover:underline">
+              ← Quay lại đăng nhập
+            </Link>
+          </CardFooter>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="admin-login-page">
-      <main className="admin-login">
-        <section className="admin-login-card">
-          <header className="admin-login-header">
-            <h1>Đăng ký tài khoản</h1>
-          </header>
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader>
+          <CardTitle>Đăng ký tài khoản</CardTitle>
+        </CardHeader>
 
+        <CardContent className="space-y-4">
           {message && (
-            <div className="admin-alert admin-alert-error" role="alert">
+            <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {message}
             </div>
           )}
 
-          <form className="admin-login-form" action={formAction}>
-            <div className="form-field">
-              <label htmlFor="username">Tên đăng nhập</label>
-              <input id="username" name="username" type="text" required />
+          <form className="space-y-4" action={formAction}>
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Tên đăng nhập</Label>
+              <Input id="username" name="username" type="text" required />
             </div>
-            <div className="form-field">
-              <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" required />
+            <div className="space-y-1.5">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
             </div>
-            <div className="form-field">
-              <label htmlFor="password">Mật khẩu</label>
-              <input id="password" name="password" type="password" required minLength={8} />
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Mật khẩu</Label>
+              <Input id="password" name="password" type="password" required minLength={8} />
             </div>
-            <button type="submit" className="button button-primary" disabled={pending}>
+            <Button type="submit" className="w-full" disabled={pending}>
               {pending ? "Đang xử lý..." : "Đăng ký"}
-            </button>
+            </Button>
           </form>
+        </CardContent>
 
-          <footer className="admin-login-footer">
-            <Link href="/login">Đã có tài khoản? Đăng nhập</Link>
-          </footer>
-        </section>
-      </main>
+        <CardFooter>
+          <Link href="/login" className="text-sm hover:underline">
+            Đã có tài khoản? Đăng nhập
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

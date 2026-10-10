@@ -1,7 +1,17 @@
-import { signIn } from "@/lib/auth-nextauth";
-import "../admin/admin.css";
 import Link from "next/link";
-import { loginSchema, firstZodError } from "@/lib/validation";
+import { signIn } from "@/lib/auth-nextauth";
+import "../tailwind.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
 
 export default function LoginPage({
   searchParams,
@@ -9,53 +19,46 @@ export default function LoginPage({
   searchParams: Promise<{ error?: string }>;
 }) {
   return (
-    <div className="admin-login-page">
-      <main className="admin-login">
-        <section className="admin-login-card" aria-labelledby="login-title">
-          <header className="admin-login-header">
-            <p className="admin-login-school">THPT A Trần Hưng Đạo</p>
-            <h1 id="login-title">Thư viện Ấn phẩm số</h1>
-            <p className="admin-login-description">Đăng nhập</p>
-          </header>
+    <div className="flex min-h-screen items-center justify-center bg-muted/40 px-4">
+      <Card className="w-full max-w-sm">
+        <CardHeader className="text-center">
+          <p className="text-sm text-muted-foreground">THPT A Trần Hưng Đạo</p>
+          <CardTitle className="text-xl">Thư viện Ấn phẩm số</CardTitle>
+          <CardDescription>Đăng nhập</CardDescription>
+        </CardHeader>
 
+        <CardContent className="space-y-4">
           <LoginError searchParams={searchParams} />
 
           <form
-            className="admin-login-form"
+            className="space-y-4"
             action={async (formData) => {
               "use server";
-              const parsed = loginSchema.safeParse({
-                username: String(formData.get("username") ?? ""),
-                password: String(formData.get("password") ?? ""),
-              });
-
-              if (!parsed.success) {
-                throw new Error(firstZodError(parsed.error));
-              }
-
               await signIn("credentials", {
-                username: parsed.data.username,
-                password: parsed.data.password,
+                username: formData.get("username"),
+                password: formData.get("password"),
                 redirectTo: "/",
               });
             }}
           >
-            <div className="form-field">
-              <label htmlFor="username">Tên đăng nhập</label>
-              <input id="username" name="username" type="text" required autoFocus />
+            <div className="space-y-1.5">
+              <Label htmlFor="username">Tên đăng nhập</Label>
+              <Input id="username" name="username" type="text" required autoFocus />
             </div>
 
-            <div className="form-field">
-              <label htmlFor="password">Mật khẩu</label>
-              <input id="password" name="password" type="password" required />
+            <div className="space-y-1.5">
+              <Label htmlFor="password">Mật khẩu</Label>
+              <Input id="password" name="password" type="password" required />
             </div>
 
-            <button type="submit" className="button button-primary admin-login-submit">
+            <Button type="submit" className="w-full">
               Đăng nhập
-            </button>
+            </Button>
           </form>
-          <div style={{ textAlign: "center", margin: "16px 0", color: "#999" }}>
-            hoặc
+
+          <div className="relative py-2 text-center text-xs text-muted-foreground">
+            <span className="bg-card relative z-10 px-2">hoặc</span>
+            <div className="absolute inset-x-0 top-1/2 h-px bg-border" />
           </div>
 
           <form
@@ -65,9 +68,9 @@ export default function LoginPage({
               await signIn("google", { redirectTo: "/" });
             }}
           >
-            <button type="submit" className="button button-secondary" style={{ width: "100%" }}>
+            <Button type="submit" variant="outline" className="w-full">
               Đăng nhập bằng Google
-            </button>
+            </Button>
           </form>
 
           <form
@@ -76,18 +79,22 @@ export default function LoginPage({
               const { signIn } = await import("@/lib/auth-nextauth");
               await signIn("facebook", { redirectTo: "/" });
             }}
-            style={{ marginTop: 8 }}
           >
-            <button type="submit" className="button button-secondary" style={{ width: "100%" }}>
+            <Button type="submit" variant="outline" className="w-full">
               Đăng nhập bằng Facebook
-            </button>
+            </Button>
           </form>
+        </CardContent>
 
-          <footer className="admin-login-footer">
-            <Link href="/">← Quay lại thư viện</Link>
-          </footer>
-        </section>
-      </main>
+        <CardFooter className="flex justify-between text-sm">
+          <Link href="/" className="text-muted-foreground hover:underline">
+            ← Quay lại thư viện
+          </Link>
+          <Link href="/register" className="hover:underline">
+            Chưa có tài khoản?
+          </Link>
+        </CardFooter>
+      </Card>
     </div>
   );
 }
@@ -100,7 +107,7 @@ async function LoginError({
   const sp = await searchParams;
   if (!sp.error) return null;
   return (
-    <div className="admin-alert admin-alert-error" role="alert">
+    <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       Tên đăng nhập hoặc mật khẩu không đúng.
     </div>
   );
