@@ -44,3 +44,5 @@ next-env.d.ts
 
 /storage/*
 !/storage/.gitkeep
+
+.vscode
