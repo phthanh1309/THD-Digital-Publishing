@@ -23,15 +23,31 @@ export default async function SiteHeader() {
           </span>
         </Link>
         <SiteNav />
-        <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div className="site-header__actions">
           {session?.user ? (
             <>
-              <Link href="/favorites">Đã lưu</Link>
-              <Link href="/history">Lịch sử</Link>
-              <Link href="/profile">{session.user.name ?? "Tài khoản"}</Link>
+              <Link className="site-header__action" href="/favorites">
+                Đã lưu
+              </Link>
+              <Link className="site-header__action" href="/history">
+                Lịch sử
+              </Link>
+              {(session.user as { role?: string }).role === "ADMIN" && (
+                <Link className="site-header__admin" href="/admin">
+                  ADMIN
+                </Link>
+              )}
+              <Link
+                className="site-header__action site-header__user"
+                href="/profile"
+              >
+                {session.user.name ?? "Tài khoản"}
+              </Link>
             </>
           ) : (
-            <Link href="/login">Đăng nhập</Link>
+            <Link className="site-header__login" href="/login">
+              Đăng nhập
+            </Link>
           )}
         </div>
       </div>

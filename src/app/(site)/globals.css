@@ -548,9 +548,9 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     z-index: var(--z-sticky);
     width: 100%;
 
-    background-color: rgb(255 255 255 / 0.82);
-    backdrop-filter: saturate(180%) blur(16px);
-    -webkit-backdrop-filter: saturate(180%) blur(16px);
+    background-color: rgb(255 255 255 / 0.86);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
 
     border-bottom: 1px solid var(--color-border-subtle);
 
@@ -563,17 +563,44 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     transform: translateZ(0);
 }
 
+/* Trạng thái dự phòng nếu có script gắn class khi cuộn */
 .site-header.is-scrolled {
-    background-color: rgb(255 255 255 / 0.94);
+    background-color: rgb(255 255 255 / 0.95);
     box-shadow: var(--shadow-sm);
     border-bottom-color: var(--color-border);
 }
 
+/*
+ * Shadow khi cuộn — thuần CSS (scroll-driven animation).
+ * Trình duyệt không hỗ trợ sẽ giữ border mảnh, không ảnh hưởng layout.
+ */
+@supports (animation-timeline: scroll()) {
+    .site-header {
+        animation-name: site-header-elevate;
+        animation-duration: 1ms; /* Firefox yêu cầu duration khi dùng scroll timeline */
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 80px;
+    }
+}
+
+@keyframes site-header-elevate {
+    from {
+        box-shadow: 0 0 0 0 rgb(15 23 42 / 0);
+        border-bottom-color: var(--color-border-subtle);
+    }
+    to {
+        box-shadow: 0 10px 30px -18px rgb(15 23 42 / 0.35);
+        border-bottom-color: var(--color-border);
+    }
+}
+
 .site-header__inner {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr) auto;
     align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
+    gap: var(--space-4);
 
     min-height: var(--header-height);
     padding-block: var(--space-2-5);
@@ -601,17 +628,18 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     align-items: center;
     gap: var(--space-2-5);
 
+    justify-self: start;
     min-width: 0;
     max-width: 100%;
 
     color: inherit;
     text-decoration: none;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
 
     transition: opacity var(--transition-fast);
 }
 
-.site-brand:hover { color: inherit; opacity: 0.88; }
+.site-brand:hover { color: inherit; opacity: 1; }
 
 .site-brand:focus-visible {
     outline: 2px solid var(--color-ring);
@@ -620,36 +648,35 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 
 .site-brand__logo {
     flex: 0 0 auto;
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
+    padding: 3px;
 
     object-fit: contain;
     object-position: center;
 
-    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-xl);
     background-color: var(--color-neutral-0);
+    box-shadow: var(--shadow-xs);
 
-    transition: transform var(--transition-base);
+    transition:
+        transform var(--transition-base),
+        box-shadow var(--transition-base),
+        border-color var(--transition-base);
 }
 
-.site-brand:hover .site-brand__logo { transform: scale(1.04); }
-
-@media (min-width: 480px) {
-    .site-brand__logo { width: 40px; height: 40px; }
-}
-@media (min-width: 640px) {
-    .site-brand { gap: var(--space-3); }
-    .site-brand__logo { width: 44px; height: 44px; }
-}
-@media (min-width: 1024px) {
-    .site-brand__logo { width: 48px; height: 48px; }
+.site-brand:hover .site-brand__logo {
+    transform: translateY(-1px) scale(1.03);
+    border-color: var(--color-brand-200);
+    box-shadow: var(--shadow-sm);
 }
 
 .site-brand__text {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 1px;
+    gap: 2px;
 
     min-width: 0;
     flex: 1 1 auto;
@@ -658,27 +685,31 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 .site-brand__school {
     display: block;
 
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
-    line-height: var(--line-height-snug);
-    letter-spacing: var(--letter-spacing-tight);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
 
-    color: var(--color-neutral-900);
+    color: #1a1a2e;
 
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+
+    transition: color var(--transition-fast);
 }
+
+.site-brand:hover .site-brand__school { color: var(--color-brand-700); }
 
 .site-brand__platform {
     display: block;
 
-    font-size: 0.625rem;
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-snug);
-    letter-spacing: var(--letter-spacing-wide);
+    font-size: var(--font-size-2xs);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+    letter-spacing: 0.09em;
 
-    color: var(--color-text-subtle);
+    color: var(--color-brand-600);
     text-transform: uppercase;
 
     overflow: hidden;
@@ -687,20 +718,47 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (min-width: 480px) {
-    .site-brand__school   { font-size: var(--font-size-sm); }
+    .site-brand__logo     { width: 46px; height: 46px; }
+    .site-brand__school   { font-size: 0.9375rem; }
     .site-brand__platform { font-size: var(--font-size-xs); }
 }
 
 @media (min-width: 640px) {
+    .site-brand { gap: var(--space-3); }
+    .site-brand__logo { width: 50px; height: 50px; }
     .site-brand__school { font-size: var(--font-size-md); }
 }
 
-/* Giới hạn chiều rộng khối chữ trên mobile để không đẩy nav */
-@media (max-width: 479px) {
-    .site-brand__text { max-width: 150px; }
+@media (min-width: 1024px) {
+    .site-brand__logo { width: 54px; height: 54px; padding: 4px; }
+    .site-brand__school { font-size: 1.0625rem; }
 }
+
+/* Tablet: thu gọn brand để nhường chỗ cho nav + nhóm actions */
+@media (max-width: 1023px) {
+    .site-brand__logo { width: 46px; height: 46px; }
+    .site-brand__school { font-size: var(--font-size-sm); }
+}
+
+/* Mobile: bỏ dòng mô tả phụ, giữ logo + tên trường */
+@media (max-width: 767px) {
+    .site-brand { gap: var(--space-2); }
+    .site-brand__logo { width: 42px; height: 42px; padding: 2px; }
+    .site-brand__text { gap: 0; }
+    .site-brand__school { font-size: 0.9375rem; }
+    .site-brand__platform { display: none; }
+}
+
+@media (max-width: 479px) {
+    .site-brand__logo { width: 38px; height: 38px; }
+    .site-brand__text { max-width: 112px; }
+    .site-brand__school { font-size: var(--font-size-xs); }
+}
+
 @media (max-width: 379px) {
-    .site-brand__text { max-width: 118px; }
+    .site-brand__logo { width: 32px; height: 32px; }
+    .site-brand__text { max-width: 88px; }
+    .site-brand__school { font-size: 0.6875rem; }
 }
 
 
@@ -709,41 +767,49 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
    ========================================================================== */
 
 .site-nav {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-0-5);
+    justify-self: center;
+    gap: 2px;
     flex: 0 0 auto;
+
+    padding: 4px;
+
+    background-color: var(--color-bg-subtle);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.65);
 }
 
 .site-nav a {
-    position: relative;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
 
-    min-height: 40px;
+    min-height: 34px;
 
-    padding: var(--space-2) var(--space-2-5);
+    padding: 0 var(--space-4);
 
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     line-height: var(--line-height-none);
 
     color: var(--color-text-muted);
     text-decoration: none;
 
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-full);
     white-space: nowrap;
 
     transition:
         color var(--transition-fast),
-        background-color var(--transition-fast);
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast);
 }
 
 .site-nav a:hover {
     color: var(--color-brand-700);
-    background-color: var(--color-brand-50);
+    background-color: rgb(255 255 255 / 0.9);
+    box-shadow: var(--shadow-xs);
 }
 
 .site-nav a:active { background-color: var(--color-brand-100); }
@@ -753,58 +819,211 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     outline-offset: 2px;
 }
 
-.site-nav a::after {
-    content: "";
-    position: absolute;
-    left: var(--space-2-5);
-    right: var(--space-2-5);
-    bottom: 6px;
-
-    height: 2px;
-
-    background-color: currentColor;
-    border-radius: var(--radius-full);
-
-    transform: scaleX(0);
-    transform-origin: center;
-    transition: transform var(--transition-base);
-}
-
-.site-nav a:hover::after { transform: scaleX(1); }
-
 .site-nav a.is-active,
 .site-nav a[aria-current="page"] {
     color: var(--color-brand-700);
-    background-color: var(--color-brand-50);
+    background-color: var(--color-neutral-0);
     font-weight: var(--font-weight-semibold);
+    box-shadow:
+        var(--shadow-xs),
+        inset 0 0 0 1px var(--color-brand-100);
 }
 
-.site-nav a.is-active::after,
-.site-nav a[aria-current="page"]::after {
-    transform: scaleX(1);
+/* Nhóm hành động bên phải */
+.site-header__actions {
+    display: flex;
+    align-items: center;
+    justify-self: end;
+    gap: var(--space-1);
+
+    min-width: 0;
 }
 
-@media (min-width: 480px) {
-    .site-nav { gap: var(--space-1); }
+.site-header__action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 36px;
+    padding: 0 var(--space-3);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-none);
+
+    color: var(--color-text-muted);
+    text-decoration: none;
+
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+.site-header__action:hover {
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+}
+
+.site-header__action:active { background-color: var(--color-brand-100); }
+
+.site-header__action:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+.site-header__user {
+    display: inline-block;
+
+    max-width: 160px;
+    line-height: 36px;
+
+    color: var(--color-text);
+    background-color: var(--color-bg-subtle);
+    font-weight: var(--font-weight-semibold);
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.site-header__user:hover { background-color: var(--color-brand-50); }
+
+/* Nút CTA: Đăng nhập / ADMIN */
+.site-header__login,
+.site-header__admin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-height: 38px;
+    padding: 0 var(--space-4);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+
+    color: var(--color-neutral-0);
+    text-decoration: none;
+    white-space: nowrap;
+
+    border-radius: var(--radius-full);
+    background-color: var(--color-brand-600);
+    box-shadow:
+        0 1px 2px rgb(15 23 42 / 0.08),
+        0 6px 16px -10px rgb(79 70 229 / 0.55);
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        transform var(--transition-fast);
+}
+
+.site-header__admin {
+    background-color: var(--color-brand-700);
+    letter-spacing: 0.04em;
+}
+
+.site-header__login:hover,
+.site-header__admin:hover {
+    color: var(--color-neutral-0);
+    box-shadow:
+        0 2px 4px rgb(15 23 42 / 0.10),
+        0 10px 22px -10px rgb(79 70 229 / 0.65);
+    transform: translateY(-1px);
+}
+
+.site-header__login:hover { background-color: var(--color-brand-700); }
+.site-header__admin:hover { background-color: var(--color-brand-800); }
+
+.site-header__login:active,
+.site-header__admin:active {
+    background-color: var(--color-brand-800);
+    transform: translateY(0);
+}
+
+.site-header__login:focus-visible,
+.site-header__admin:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+}
+
+/* Tablet: thu gọn để brand + nav + actions vẫn vừa một hàng */
+@media (max-width: 1023px) {
+    .site-header__inner { gap: var(--space-2); }
+
+    .site-nav { padding: 3px; }
     .site-nav a {
-        padding: var(--space-2) var(--space-3);
-        font-size: var(--font-size-sm);
+        min-height: 32px;
+        padding: 0 var(--space-2);
+        font-size: var(--font-size-xs);
     }
-    .site-nav a::after { left: var(--space-3); right: var(--space-3); }
+
+    .site-header__actions { gap: var(--space-0-5); }
+    .site-header__action {
+        min-height: 34px;
+        padding: 0 var(--space-2);
+        font-size: var(--font-size-xs);
+    }
+    .site-header__user {
+        max-width: 120px;
+        line-height: 34px;
+    }
+    .site-header__login,
+    .site-header__admin {
+        min-height: 34px;
+        padding: 0 var(--space-3);
+        font-size: var(--font-size-xs);
+    }
 }
 
-@media (min-width: 640px) {
-    .site-nav a { min-height: 42px; }
+/* Mobile: ẩn menu giữa, header còn brand + actions */
+@media (max-width: 767px) {
+    .site-header__inner {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: var(--space-2);
+    }
+
+    .site-nav { display: none; }
 }
 
-/* Ẩn bớt chữ trên mobile rất nhỏ — chỉ hiện icon dạng text gọn */
+@media (max-width: 479px) {
+    .site-header__actions { gap: 0; }
+
+    .site-header__action {
+        min-height: 32px;
+        padding: 0 var(--space-1-5);
+        font-size: var(--font-size-2xs);
+    }
+    .site-header__user {
+        max-width: 84px;
+        line-height: 32px;
+    }
+    .site-header__login,
+    .site-header__admin {
+        min-height: 32px;
+        padding: 0 var(--space-2-5);
+        font-size: var(--font-size-2xs);
+    }
+}
+
 @media (max-width: 379px) {
-    .site-nav a {
-        padding: var(--space-1-5) var(--space-2);
-        min-height: 36px;
-        font-size: 0.6875rem;
+    .site-header__action {
+        min-height: 30px;
+        padding: 0 var(--space-1);
     }
-    .site-nav a::after { left: var(--space-2); right: var(--space-2); }
+    .site-header__user {
+        max-width: 68px;
+        line-height: 30px;
+    }
+    .site-header__login,
+    .site-header__admin {
+        min-height: 30px;
+        padding: 0 var(--space-2);
+    }
 }
 
 
@@ -2055,9 +2274,6 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         --font-size-md: 0.9375rem;
     }
 
-    .site-brand__school   { font-size: var(--font-size-xs); }
-    .site-brand__platform { font-size: 0.625rem; }
-
     .hero { padding-block: var(--space-8) var(--space-7); }
     .hero__title { font-size: 1.625rem; }
 
@@ -2108,7 +2324,6 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     }
     .button:hover { transform: none; }
     .button--primary::before { display: none; }
-    .site-nav a:hover::after { transform: scaleX(0); }
 }
 
 
@@ -2150,22 +2365,67 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     }
 
     .site-header {
-        background-color: rgb(11 17 32 / 0.82);
+        background-color: rgb(11 17 32 / 0.86);
         border-bottom-color: var(--color-border-subtle);
     }
 
-    .site-header.is-scrolled { background-color: rgb(11 17 32 / 0.94); }
+    .site-header.is-scrolled { background-color: rgb(11 17 32 / 0.95); }
 
     .site-brand__school { color: var(--color-text); }
+    .site-brand:hover .site-brand__school { color: var(--color-brand-300); }
+    .site-brand__platform { color: var(--color-brand-300); }
+
+    .site-brand__logo {
+        background-color: var(--color-neutral-0);
+        border-color: var(--color-border-strong);
+    }
+
+    .site-nav {
+        background-color: rgb(255 255 255 / 0.04);
+        border-color: var(--color-border);
+        box-shadow: none;
+    }
 
     .site-nav a { color: var(--color-text-muted); }
 
-    .site-nav a:hover,
+    .site-nav a:hover {
+        color: var(--color-brand-200);
+        background-color: rgb(255 255 255 / 0.07);
+        box-shadow: none;
+    }
+
     .site-nav a.is-active,
     .site-nav a[aria-current="page"] {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.18);
+        box-shadow: inset 0 0 0 1px rgb(99 102 241 / 0.30);
+    }
+
+    .site-header__action { color: var(--color-text-muted); }
+
+    .site-header__action:hover {
         color: var(--color-brand-300);
         background-color: rgb(99 102 241 / 0.14);
     }
+
+    .site-header__user {
+        color: var(--color-text);
+        background-color: rgb(255 255 255 / 0.06);
+    }
+
+    .site-header__user:hover {
+        color: var(--color-brand-300);
+        background-color: rgb(99 102 241 / 0.14);
+    }
+
+    .site-header__login { background-color: var(--color-brand-600); }
+    .site-header__admin { background-color: var(--color-brand-700); }
+
+    .site-header__login:hover { background-color: var(--color-brand-500); }
+    .site-header__admin:hover { background-color: var(--color-brand-600); }
+
+    .site-header__login:active,
+    .site-header__admin:active { background-color: var(--color-brand-700); }
 
     .hero {
         background:
@@ -2354,7 +2614,14 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         --color-border-strong: var(--color-neutral-500);
     }
 
-    .site-nav a { color: var(--color-neutral-800); }
+    .site-nav a,
+    .site-header__action { color: var(--color-neutral-800); }
+
+    .site-header__user {
+        color: var(--color-neutral-900);
+        background-color: var(--color-neutral-100);
+    }
+
     .publication-card { border-width: 2px; }
     .button { border-width: 2px; }
 
@@ -2372,6 +2639,12 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 
     .button, .publication-card, .empty-state,
     .site-header, .site-footer { border: 1px solid CanvasText; }
+
+    .site-nav, .site-nav a,
+    .site-header__action, .site-header__user,
+    .site-header__login, .site-header__admin {
+        border: 1px solid CanvasText;
+    }
 
     .publication-card__year { border: 1px solid CanvasText; }
     .hero__eyebrow { border: 1px solid CanvasText; }
