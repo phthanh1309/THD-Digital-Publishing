@@ -2892,6 +2892,95 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 .library-header h1 { margin: var(--space-2) 0; }
 .library-header p { color: var(--color-text-muted); max-width: 62ch; }
 
+/* Header riêng cho /publications — đồng bộ phong cách hero trang chủ.
+   Giữ nguyên .library-header gốc để không ảnh hưởng /search. */
+.library-header--publications {
+    --library-header-halo: rgb(79 70 229 / 0.07);
+
+    padding-block:
+        clamp(2.5rem, 1.9rem + 3.2vw, 4.25rem)
+        clamp(2rem, 1.6rem + 2vw, 3.25rem);
+
+    background:
+        radial-gradient(90% 70% at 50% -25%, var(--library-header-halo) 0%, transparent 62%),
+        linear-gradient(180deg, var(--color-bg-elevated) 0%, var(--color-bg) 100%);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Eyebrow dạng pill, đồng bộ .hero__eyebrow */
+.library-header--publications .section-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+
+    margin: 0 0 var(--space-3);
+    padding: var(--space-1-5) var(--space-3-5);
+
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-widest);
+    text-transform: uppercase;
+
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-full);
+}
+
+.library-header--publications .section-eyebrow::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px rgb(79 70 229 / 0.12);
+}
+
+@media (min-width: 480px) {
+    .library-header--publications .section-eyebrow {
+        padding-inline: var(--space-4);
+        font-size: var(--font-size-xs);
+    }
+}
+
+.library-header--publications h1 {
+    margin: 0 0 var(--space-3);
+
+    font-size: clamp(1.9rem, 1.35rem + 2.6vw, 3.25rem);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.06;
+    letter-spacing: var(--letter-spacing-tighter);
+
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+.library-header--publications p:not(.section-eyebrow) {
+    margin: 0;
+    max-width: 58ch;
+
+    font-size: clamp(1rem, 0.96rem + 0.26vw, 1.125rem);
+    line-height: var(--line-height-relaxed);
+
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+@media (prefers-color-scheme: dark) {
+    .library-header--publications {
+        --library-header-halo: rgb(99 102 241 / 0.16);
+        border-bottom-color: var(--color-border-subtle);
+    }
+
+    .library-header--publications .section-eyebrow {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.16);
+        border-color: rgb(99 102 241 / 0.32);
+    }
+}
+
 .library {
     padding-block:
         clamp(2.5rem, 1.8rem + 3vw, 4.5rem)
@@ -2986,6 +3075,125 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     box-shadow: var(--shadow-sm);
 }
 
+/* --------------------------------------------------------------------------
+   Bộ lọc riêng cho /publications (scope theo .library--publications)
+   -------------------------------------------------------------------------- */
+.library--publications .library-filters {
+    gap: var(--space-4);
+    padding: var(--space-5);
+
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 640px) {
+    .library--publications .library-filters {
+        grid-template-columns:
+            minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+        padding: var(--space-6);
+    }
+}
+
+.library--publications .filter-field { min-width: 0; }
+
+.library--publications .filter-field label {
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    letter-spacing: var(--letter-spacing-wide);
+    color: var(--color-text-muted);
+}
+
+.library--publications .filter-field input,
+.library--publications .filter-field select {
+    min-height: 46px;
+    padding: var(--space-2-5) var(--space-3-5);
+
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.03);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+.library--publications .filter-field input::placeholder {
+    color: var(--color-text-subtle);
+}
+
+.library--publications .filter-field input:hover,
+.library--publications .filter-field select:hover {
+    border-color: var(--color-border-strong);
+    background-color: var(--color-bg-elevated);
+}
+
+.library--publications .filter-field input:focus-visible,
+.library--publications .filter-field select:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-color: var(--color-brand-300);
+    box-shadow: 0 0 0 4px rgb(79 70 229 / 0.12);
+}
+
+.library--publications .library-filters .button {
+    --button-radius: var(--radius-full);
+    min-height: 46px;
+}
+
+.library--publications .library-filters .button--primary {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+    box-shadow:
+        0 1px 2px rgb(15 23 42 / 0.10),
+        0 10px 22px -14px rgb(79 70 229 / 0.65);
+}
+
+.library--publications .library-filters .button--primary:hover {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+}
+
+@media (max-width: 639px) {
+    .library--publications .filter-actions { gap: var(--space-2-5); }
+
+    .library--publications .filter-actions .button {
+        flex: 1 1 9rem;
+        min-height: 46px;
+    }
+}
+
+@media (max-width: 379px) {
+    .library--publications .library-filters { padding: var(--space-4); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .library--publications .library-filters {
+        background-color: var(--color-bg-elevated);
+        border-color: var(--color-border);
+        box-shadow: var(--shadow-xs);
+    }
+
+    .library--publications .filter-field input,
+    .library--publications .filter-field select {
+        background-color: var(--color-bg);
+        box-shadow: none;
+    }
+
+    .library--publications .filter-field input:hover,
+    .library--publications .filter-field select:hover {
+        background-color: var(--color-bg-subtle);
+    }
+}
+
 .library-results__summary {
     margin-bottom: var(--space-5);
     font-size: var(--font-size-sm);
@@ -3017,6 +3225,185 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     background: var(--color-brand-600);
     color: var(--color-neutral-0);
     font-weight: var(--font-weight-semibold);
+}
+
+/* --------------------------------------------------------------------------
+   Summary & phân trang riêng cho /publications
+   -------------------------------------------------------------------------- */
+.library--publications .library-results__summary {
+    margin-bottom: var(--space-5);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+}
+
+.library--publications .library-results__summary strong {
+    color: var(--color-text);
+    font-weight: var(--font-weight-semibold);
+    font-variant-numeric: tabular-nums;
+}
+
+.library--publications .pagination a,
+.library--publications .pagination span {
+    min-width: 44px;
+    min-height: 44px;
+    font-weight: var(--font-weight-medium);
+    border: 1px solid transparent;
+}
+
+.library--publications .pagination a {
+    color: var(--color-text);
+    background-color: var(--color-bg-elevated);
+    border-color: var(--color-border-subtle);
+    box-shadow: var(--shadow-xs);
+
+    transition:
+        color var(--transition-fast),
+        background-color var(--transition-fast),
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast);
+}
+
+.library--publications .pagination a:hover {
+    color: var(--color-brand-700);
+    background-color: var(--color-bg-elevated);
+    border-color: var(--color-brand-200);
+    box-shadow: var(--shadow-sm);
+}
+
+.library--publications .pagination a:active {
+    background-color: var(--color-brand-50);
+}
+
+.library--publications .pagination a:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+}
+
+.library--publications .pagination span[aria-current="page"] {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+    font-weight: var(--font-weight-semibold);
+    box-shadow: 0 6px 16px -10px rgb(79 70 229 / 0.75);
+}
+
+@media (prefers-color-scheme: dark) {
+    .library--publications .pagination a {
+        color: var(--color-text);
+        background-color: rgb(255 255 255 / 0.04);
+        border-color: var(--color-border);
+        box-shadow: none;
+    }
+
+    .library--publications .pagination a:hover {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.16);
+        border-color: rgb(99 102 241 / 0.32);
+        box-shadow: none;
+    }
+
+    .library--publications .pagination a:active {
+        background-color: rgb(99 102 241 / 0.24);
+    }
+
+    .library--publications .pagination span[aria-current="page"] {
+        color: var(--color-neutral-0);
+        background-color: var(--color-brand-600);
+        border-color: var(--color-brand-600);
+        box-shadow: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Empty state riêng cho /publications (không ảnh hưởng /search)
+   -------------------------------------------------------------------------- */
+.library--publications .empty-state {
+    padding: var(--space-12) var(--space-6);
+
+    background-color: var(--color-bg-elevated);
+    background-image:
+        radial-gradient(80% 60% at 50% 0%, rgb(79 70 229 / 0.06) 0%, transparent 62%);
+
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-xs);
+}
+
+@media (min-width: 768px) {
+    .library--publications .empty-state {
+        padding: var(--space-16) var(--space-10);
+    }
+}
+
+.library--publications .empty-state::before {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-2xl);
+    background-color: var(--color-brand-50);
+    border-color: var(--color-brand-100);
+}
+
+.library--publications .empty-state h2 {
+    margin: 0;
+    font-size: clamp(1.25rem, 1.12rem + 0.5vw, 1.5rem);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+.library--publications .empty-state p {
+    margin: 0;
+    max-width: 46ch;
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-relaxed);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+@media (prefers-color-scheme: dark) {
+    .library--publications .empty-state {
+        background-color: var(--color-bg-elevated);
+        background-image:
+            radial-gradient(80% 60% at 50% 0%, rgb(99 102 241 / 0.12) 0%, transparent 62%);
+        border-color: var(--color-border);
+        box-shadow: var(--shadow-xs);
+    }
+
+    .library--publications .empty-state::before {
+        background-color: rgb(99 102 241 / 0.14);
+        border-color: rgb(99 102 241 / 0.28);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   High contrast & forced colors cho thành phần /publications
+   (đặt sau các rule ở trên để không bị ghi đè theo thứ tự nguồn)
+   -------------------------------------------------------------------------- */
+@media (prefers-contrast: more) {
+    .library--publications .library-filters,
+    .library--publications .empty-state,
+    .library--publications .pagination a {
+        border-width: 2px;
+    }
+}
+
+@media (forced-colors: active) {
+    .library--publications .section-eyebrow,
+    .library--publications .library-filters,
+    .library--publications .empty-state,
+    .library--publications .filter-field input,
+    .library--publications .filter-field select,
+    .library--publications .pagination a,
+    .library--publications .pagination span {
+        border: 1px solid CanvasText;
+    }
+
+    .library--publications .pagination span[aria-current="page"] {
+        border-width: 2px;
+    }
 }
 
 .visually-hidden {
@@ -3175,4 +3562,423 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     font-size: var(--font-size-lg); font-weight: var(--font-weight-semibold);
     color: var(--color-brand-700);
     background: repeating-linear-gradient(45deg, var(--color-brand-50) 0, var(--color-brand-50) 12px, var(--color-brand-100) 12px, var(--color-brand-100) 24px);
+}
+
+
+/* ==========================================================================
+   27. PROFILE PAGE — /profile
+   Chỉ áp dụng cho trang hồ sơ cá nhân, không ảnh hưởng trang khác.
+   ========================================================================== */
+
+.profile-page {
+    padding-block:
+        clamp(2.5rem, 2rem + 3vw, 4.5rem)
+        clamp(3.5rem, 2.8rem + 4vw, 6rem);
+}
+
+.profile-page__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-5);
+
+    max-width: 1040px;
+    margin-inline: auto;
+    padding-inline: var(--container-padding);
+}
+
+@media (min-width: 900px) {
+    .profile-page__inner {
+        grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
+        align-items: start;
+        gap: var(--space-8);
+    }
+}
+
+/* --- Thẻ thông tin tài khoản --- */
+.profile-page__header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+
+    padding: var(--space-6);
+    min-width: 0;
+
+    text-align: center;
+
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-xs);
+}
+
+@media (min-width: 900px) {
+    .profile-page__header {
+        padding: var(--space-8) var(--space-6);
+    }
+}
+
+/*
+ * Header dùng chung là position: sticky (không phải fixed) và cao
+ * --header-height (72px từ 640px, 80px từ 1024px) + 1px border.
+ * Chỉ sticky khi header trang không bị chuyển sang static
+ * (landscape màn hình thấp ≤480px, xem mục 18.5).
+ */
+@media (min-width: 900px) and (min-height: 481px) {
+    .profile-page__header {
+        position: sticky;
+        top: calc(var(--header-height) + var(--space-6) + 1px);
+    }
+}
+
+.profile-page__avatar-wrap {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+
+    width: 96px;
+    height: 96px;
+    overflow: hidden;
+
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+    border: 1px solid var(--color-brand-200);
+    border-radius: var(--radius-full);
+}
+
+.profile-page__avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: var(--radius-full);
+}
+
+.profile-page__avatar-initials {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-tight);
+    user-select: none;
+}
+
+.profile-page__intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+}
+
+.profile-page__eyebrow {
+    margin: 0;
+    font-size: 0.6875rem;
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-widest);
+    text-transform: uppercase;
+    color: var(--color-brand-600);
+}
+
+.profile-page__title {
+    margin: 0;
+    font-size: clamp(1.625rem, 1.35rem + 1.2vw, 2rem);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-tight);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+    text-wrap: balance;
+}
+
+.profile-page__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.profile-page__username {
+    display: inline-block;
+    max-width: 100%;
+
+    padding: var(--space-1) var(--space-3);
+
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    overflow-wrap: anywhere;
+
+    color: var(--color-brand-700);
+    background-color: var(--color-brand-50);
+    border: 1px solid var(--color-brand-100);
+    border-radius: var(--radius-full);
+}
+
+.profile-page__email {
+    max-width: 100%;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    overflow-wrap: anywhere;
+}
+
+/* --- Thẻ form chỉnh sửa --- */
+.profile-page__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    min-width: 0;
+
+    padding: var(--space-6);
+
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-sm);
+}
+
+@media (min-width: 768px) {
+    .profile-page__form { padding: var(--space-8); }
+}
+
+.profile-page__form-head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1-5);
+    padding-bottom: var(--space-5);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.profile-page__form-title {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+    letter-spacing: var(--letter-spacing-tight);
+    color: var(--color-text);
+}
+
+.profile-page__form-desc {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+}
+
+.profile-page__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.profile-page__label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.profile-page__control,
+.profile-page__file {
+    width: 100%;
+    min-width: 0;
+
+    color: var(--color-text);
+    background-color: var(--color-bg);
+
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+
+    transition:
+        border-color var(--transition-fast),
+        box-shadow var(--transition-fast),
+        background-color var(--transition-fast);
+}
+
+.profile-page__control {
+    min-height: 46px;
+    padding: var(--space-3) var(--space-4);
+    font-size: var(--font-size-md);
+}
+
+.profile-page__control--textarea {
+    min-height: 132px;
+    padding-block: var(--space-3);
+    line-height: var(--line-height-relaxed);
+    resize: vertical;
+}
+
+.profile-page__file {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.profile-page__control::placeholder {
+    color: var(--color-text-subtle);
+}
+
+.profile-page__control:hover,
+.profile-page__file:hover {
+    border-color: var(--color-border-strong);
+    background-color: var(--color-bg-elevated);
+}
+
+.profile-page__control:focus-visible,
+.profile-page__file:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+    border-color: var(--color-brand-300);
+    box-shadow: 0 0 0 4px rgb(79 70 229 / 0.12);
+}
+
+.profile-page__file::file-selector-button {
+    margin-right: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+    border: 1px solid var(--color-brand-600);
+    border-radius: var(--radius-lg);
+
+    cursor: pointer;
+    transition:
+        background-color var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.profile-page__file:hover::file-selector-button {
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+}
+
+.profile-page__hint {
+    margin: 0;
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-subtle);
+}
+
+.profile-page__actions {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+@media (min-width: 640px) {
+    .profile-page__actions { justify-content: flex-end; }
+}
+
+@media (max-width: 479px) {
+    .profile-page__actions .button { width: 100%; }
+}
+
+.profile-page__submit {
+    --button-radius: var(--radius-full);
+
+    min-height: 48px;
+    padding-inline: var(--space-6);
+
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+    box-shadow:
+        0 1px 2px rgb(15 23 42 / 0.10),
+        0 12px 24px -14px rgb(79 70 229 / 0.65);
+}
+
+.profile-page__submit::before { display: none; }
+
+.profile-page__submit:hover {
+    color: var(--color-neutral-0);
+    background-color: var(--color-brand-700);
+    border-color: var(--color-brand-700);
+    box-shadow:
+        0 2px 4px rgb(15 23 42 / 0.12),
+        0 16px 30px -14px rgb(79 70 229 / 0.70);
+}
+
+.profile-page__submit:active {
+    background-color: var(--color-brand-800);
+    border-color: var(--color-brand-800);
+}
+
+.profile-page__submit:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 3px;
+}
+
+.profile-page__submit:disabled,
+.profile-page__submit[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+}
+
+@media (max-width: 379px) {
+    .profile-page__header,
+    .profile-page__form { padding: var(--space-5); }
+}
+
+@media (prefers-color-scheme: dark) {
+    .profile-page__header,
+    .profile-page__form {
+        background-color: var(--color-bg-elevated);
+        border-color: var(--color-border);
+        box-shadow: var(--shadow-xs);
+    }
+
+    .profile-page__avatar-wrap {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.14);
+        border-color: rgb(99 102 241 / 0.30);
+    }
+
+    .profile-page__username {
+        color: var(--color-brand-200);
+        background-color: rgb(99 102 241 / 0.16);
+        border-color: rgb(99 102 241 / 0.32);
+    }
+
+    .profile-page__control,
+    .profile-page__file {
+        background-color: var(--color-bg);
+        border-color: var(--color-border);
+    }
+
+    .profile-page__control:hover,
+    .profile-page__file:hover {
+        background-color: var(--color-bg-subtle);
+    }
+
+    .profile-page__hint { color: var(--color-text-muted); }
+}
+
+@media (prefers-contrast: more) {
+    .profile-page__header,
+    .profile-page__form,
+    .profile-page__control,
+    .profile-page__file {
+        border-width: 2px;
+    }
+}
+
+@media (forced-colors: active) {
+    .profile-page__header,
+    .profile-page__form,
+    .profile-page__avatar-wrap,
+    .profile-page__username,
+    .profile-page__control,
+    .profile-page__file,
+    .profile-page__submit {
+        border: 1px solid CanvasText;
+    }
 }

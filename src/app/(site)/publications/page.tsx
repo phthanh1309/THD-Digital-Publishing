@@ -74,7 +74,7 @@ export default async function PublicationsPage({
 
   return (
     <>
-      <section className="library-header">
+      <section className="library-header library-header--publications">
         <div className="library-header__inner">
           <p className="section-eyebrow">THƯ VIỆN</p>
           <h1>Ấn phẩm số</h1>
@@ -85,7 +85,7 @@ export default async function PublicationsPage({
         </div>
       </section>
 
-      <section className="library" aria-labelledby="library-title">
+      <section className="library library--publications" aria-labelledby="library-title">
         <div className="library__inner">
           <h2 id="library-title" className="visually-hidden">
             Danh sách ấn phẩm
