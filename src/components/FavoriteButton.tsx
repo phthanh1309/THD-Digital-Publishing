@@ -36,9 +36,12 @@ export default function FavoriteButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="button button--secondary"
+      aria-pressed={saved}
+      aria-busy={isPending}
+      className="button button--secondary button--toggle"
     >
-      {saved ? "⭐ Đã lưu" : "☆ Lưu ấn phẩm"}
+      <span aria-hidden="true">{saved ? "⭐" : "☆"}</span>
+      <span>{saved ? "Đã lưu" : "Lưu ấn phẩm"}</span>
     </button>
   );
 }

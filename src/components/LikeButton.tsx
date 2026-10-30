@@ -39,9 +39,14 @@ export default function LikeButton({
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="button button--secondary"
+      aria-pressed={localLiked}
+      aria-busy={isPending}
+      className="button button--secondary button--toggle"
     >
-      {localLiked ? "❤️ Đã thích" : "🤍 Thích"} ({localCount})
+      <span aria-hidden="true">{localLiked ? "❤️" : "🤍"}</span>
+      <span>
+        {localLiked ? "Đã thích" : "Thích"} ({localCount})
+      </span>
     </button>
   );
 }
