@@ -2892,9 +2892,11 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 .library-header h1 { margin: var(--space-2) 0; }
 .library-header p { color: var(--color-text-muted); max-width: 62ch; }
 
-/* Header riêng cho /publications — đồng bộ phong cách hero trang chủ.
-   Giữ nguyên .library-header gốc để không ảnh hưởng /search. */
-.library-header--publications {
+/* Header dùng chung cho /publications và /search — đồng bộ phong cách hero
+   trang chủ. Giữ nguyên .library-header gốc để không ảnh hưởng /favorites,
+   /history (hai trang này không có header riêng). */
+.library-header--publications,
+.library-header--search {
     --library-header-halo: rgb(79 70 229 / 0.07);
 
     padding-block:
@@ -2908,7 +2910,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 /* Eyebrow dạng pill, đồng bộ .hero__eyebrow */
-.library-header--publications .section-eyebrow {
+.library-header--publications .section-eyebrow,
+.library-header--search .section-eyebrow {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -2928,7 +2931,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     border-radius: var(--radius-full);
 }
 
-.library-header--publications .section-eyebrow::before {
+.library-header--publications .section-eyebrow::before,
+.library-header--search .section-eyebrow::before {
     content: "";
     flex: 0 0 auto;
     width: 6px;
@@ -2939,13 +2943,15 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (min-width: 480px) {
-    .library-header--publications .section-eyebrow {
+    .library-header--publications .section-eyebrow,
+    .library-header--search .section-eyebrow {
         padding-inline: var(--space-4);
         font-size: var(--font-size-xs);
     }
 }
 
-.library-header--publications h1 {
+.library-header--publications h1,
+.library-header--search h1 {
     margin: 0 0 var(--space-3);
 
     font-size: clamp(1.9rem, 1.35rem + 2.6vw, 3.25rem);
@@ -2957,7 +2963,14 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     text-wrap: balance;
 }
 
-.library-header--publications p:not(.section-eyebrow) {
+/* Tiêu đề /search chèn từ khóa từ URL (có thể rất dài, không qua maxLength):
+   cho phép ngắt dòng thay vì tràn ngang. */
+.library-header--search h1 {
+    overflow-wrap: anywhere;
+}
+
+.library-header--publications p:not(.section-eyebrow),
+.library-header--search p:not(.section-eyebrow) {
     margin: 0;
     max-width: 58ch;
 
@@ -2969,12 +2982,14 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (prefers-color-scheme: dark) {
-    .library-header--publications {
+    .library-header--publications,
+    .library-header--search {
         --library-header-halo: rgb(99 102 241 / 0.16);
         border-bottom-color: var(--color-border-subtle);
     }
 
-    .library-header--publications .section-eyebrow {
+    .library-header--publications .section-eyebrow,
+    .library-header--search .section-eyebrow {
         color: var(--color-brand-200);
         background-color: rgb(99 102 241 / 0.16);
         border-color: rgb(99 102 241 / 0.32);
@@ -3075,10 +3090,33 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     box-shadow: var(--shadow-sm);
 }
 
+/* Dark mode: khôi phục màu chữ sáng cho nút secondary.
+   Hai rule nền sáng ở trên nằm SAU block dark-mode gốc (mục 19) và có cùng
+   specificity, nên trước đây chúng thắng và cho ra chữ #1e293b trên nền
+   #0b1120 (tương phản ~1.3:1). Override tại đây để dark mode thắng lại. */
+@media (prefers-color-scheme: dark) {
+    .library-filters .button--secondary,
+    .empty-state .button--secondary {
+        color: var(--color-text);
+        background-color: rgb(255 255 255 / 0.06);
+        border-color: rgb(255 255 255 / 0.18);
+    }
+
+    .library-filters .button--secondary:hover,
+    .empty-state .button--secondary:hover {
+        color: var(--color-neutral-0);
+        background-color: rgb(255 255 255 / 0.12);
+        border-color: rgb(255 255 255 / 0.30);
+        box-shadow: none;
+    }
+}
+
 /* --------------------------------------------------------------------------
-   Bộ lọc riêng cho /publications (scope theo .library--publications)
+   Bộ lọc cho /publications và /search
+   (scope theo .library--publications / .library--search)
    -------------------------------------------------------------------------- */
-.library--publications .library-filters {
+.library--publications .library-filters,
+.library--search .library-filters {
     gap: var(--space-4);
     padding: var(--space-5);
 
@@ -3089,16 +3127,19 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (min-width: 640px) {
-    .library--publications .library-filters {
+    .library--publications .library-filters,
+    .library--search .library-filters {
         grid-template-columns:
             minmax(0, 2fr) minmax(0, 1fr) minmax(0, 1fr) auto;
         padding: var(--space-6);
     }
 }
 
-.library--publications .filter-field { min-width: 0; }
+.library--publications .filter-field,
+.library--search .filter-field { min-width: 0; }
 
-.library--publications .filter-field label {
+.library--publications .filter-field label,
+.library--search .filter-field label {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
     letter-spacing: var(--letter-spacing-wide);
@@ -3106,7 +3147,9 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 .library--publications .filter-field input,
-.library--publications .filter-field select {
+.library--publications .filter-field select,
+.library--search .filter-field input,
+.library--search .filter-field select {
     min-height: 46px;
     padding: var(--space-2-5) var(--space-3-5);
 
@@ -3124,30 +3167,37 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         background-color var(--transition-fast);
 }
 
-.library--publications .filter-field input::placeholder {
+.library--publications .filter-field input::placeholder,
+.library--search .filter-field input::placeholder {
     color: var(--color-text-subtle);
 }
 
 .library--publications .filter-field input:hover,
-.library--publications .filter-field select:hover {
+.library--publications .filter-field select:hover,
+.library--search .filter-field input:hover,
+.library--search .filter-field select:hover {
     border-color: var(--color-border-strong);
     background-color: var(--color-bg-elevated);
 }
 
 .library--publications .filter-field input:focus-visible,
-.library--publications .filter-field select:focus-visible {
+.library--publications .filter-field select:focus-visible,
+.library--search .filter-field input:focus-visible,
+.library--search .filter-field select:focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
     border-color: var(--color-brand-300);
     box-shadow: 0 0 0 4px rgb(79 70 229 / 0.12);
 }
 
-.library--publications .library-filters .button {
+.library--publications .library-filters .button,
+.library--search .library-filters .button {
     --button-radius: var(--radius-full);
     min-height: 46px;
 }
 
-.library--publications .library-filters .button--primary {
+.library--publications .library-filters .button--primary,
+.library--search .library-filters .button--primary {
     color: var(--color-neutral-0);
     background-color: var(--color-brand-600);
     border-color: var(--color-brand-600);
@@ -3156,40 +3206,49 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         0 10px 22px -14px rgb(79 70 229 / 0.65);
 }
 
-.library--publications .library-filters .button--primary:hover {
+.library--publications .library-filters .button--primary:hover,
+.library--search .library-filters .button--primary:hover {
     color: var(--color-neutral-0);
     background-color: var(--color-brand-700);
     border-color: var(--color-brand-700);
 }
 
 @media (max-width: 639px) {
-    .library--publications .filter-actions { gap: var(--space-2-5); }
+    .library--publications .filter-actions,
+    .library--search .filter-actions { gap: var(--space-2-5); }
 
-    .library--publications .filter-actions .button {
+    .library--publications .filter-actions .button,
+    .library--search .filter-actions .button {
         flex: 1 1 9rem;
         min-height: 46px;
     }
 }
 
 @media (max-width: 379px) {
-    .library--publications .library-filters { padding: var(--space-4); }
+    .library--publications .library-filters,
+    .library--search .library-filters { padding: var(--space-4); }
 }
 
 @media (prefers-color-scheme: dark) {
-    .library--publications .library-filters {
+    .library--publications .library-filters,
+    .library--search .library-filters {
         background-color: var(--color-bg-elevated);
         border-color: var(--color-border);
         box-shadow: var(--shadow-xs);
     }
 
     .library--publications .filter-field input,
-    .library--publications .filter-field select {
+    .library--publications .filter-field select,
+    .library--search .filter-field input,
+    .library--search .filter-field select {
         background-color: var(--color-bg);
         box-shadow: none;
     }
 
     .library--publications .filter-field input:hover,
-    .library--publications .filter-field select:hover {
+    .library--publications .filter-field select:hover,
+    .library--search .filter-field input:hover,
+    .library--search .filter-field select:hover {
         background-color: var(--color-bg-subtle);
     }
 }
@@ -3228,30 +3287,35 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 /* --------------------------------------------------------------------------
-   Summary & phân trang riêng cho /publications
+   Summary & phân trang cho /publications và /search
    -------------------------------------------------------------------------- */
-.library--publications .library-results__summary {
+.library--publications .library-results__summary,
+.library--search .library-results__summary {
     margin-bottom: var(--space-5);
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
     color: var(--color-text-muted);
 }
 
-.library--publications .library-results__summary strong {
+.library--publications .library-results__summary strong,
+.library--search .library-results__summary strong {
     color: var(--color-text);
     font-weight: var(--font-weight-semibold);
     font-variant-numeric: tabular-nums;
 }
 
 .library--publications .pagination a,
-.library--publications .pagination span {
+.library--publications .pagination span,
+.library--search .pagination a,
+.library--search .pagination span {
     min-width: 44px;
     min-height: 44px;
     font-weight: var(--font-weight-medium);
     border: 1px solid transparent;
 }
 
-.library--publications .pagination a {
+.library--publications .pagination a,
+.library--search .pagination a {
     color: var(--color-text);
     background-color: var(--color-bg-elevated);
     border-color: var(--color-border-subtle);
@@ -3264,23 +3328,27 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         box-shadow var(--transition-fast);
 }
 
-.library--publications .pagination a:hover {
+.library--publications .pagination a:hover,
+.library--search .pagination a:hover {
     color: var(--color-brand-700);
     background-color: var(--color-bg-elevated);
     border-color: var(--color-brand-200);
     box-shadow: var(--shadow-sm);
 }
 
-.library--publications .pagination a:active {
+.library--publications .pagination a:active,
+.library--search .pagination a:active {
     background-color: var(--color-brand-50);
 }
 
-.library--publications .pagination a:focus-visible {
+.library--publications .pagination a:focus-visible,
+.library--search .pagination a:focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
 }
 
-.library--publications .pagination span[aria-current="page"] {
+.library--publications .pagination span[aria-current="page"],
+.library--search .pagination span[aria-current="page"] {
     color: var(--color-neutral-0);
     background-color: var(--color-brand-600);
     border-color: var(--color-brand-600);
@@ -3289,25 +3357,29 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (prefers-color-scheme: dark) {
-    .library--publications .pagination a {
+    .library--publications .pagination a,
+    .library--search .pagination a {
         color: var(--color-text);
         background-color: rgb(255 255 255 / 0.04);
         border-color: var(--color-border);
         box-shadow: none;
     }
 
-    .library--publications .pagination a:hover {
+    .library--publications .pagination a:hover,
+    .library--search .pagination a:hover {
         color: var(--color-brand-200);
         background-color: rgb(99 102 241 / 0.16);
         border-color: rgb(99 102 241 / 0.32);
         box-shadow: none;
     }
 
-    .library--publications .pagination a:active {
+    .library--publications .pagination a:active,
+    .library--search .pagination a:active {
         background-color: rgb(99 102 241 / 0.24);
     }
 
-    .library--publications .pagination span[aria-current="page"] {
+    .library--publications .pagination span[aria-current="page"],
+    .library--search .pagination span[aria-current="page"] {
         color: var(--color-neutral-0);
         background-color: var(--color-brand-600);
         border-color: var(--color-brand-600);
@@ -3316,9 +3388,11 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 /* --------------------------------------------------------------------------
-   Empty state riêng cho /publications (không ảnh hưởng /search)
+   Empty state cho /publications và /search
+   (không ảnh hưởng empty state của /favorites, /history)
    -------------------------------------------------------------------------- */
-.library--publications .empty-state {
+.library--publications .empty-state,
+.library--search .empty-state {
     padding: var(--space-12) var(--space-6);
 
     background-color: var(--color-bg-elevated);
@@ -3331,12 +3405,14 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (min-width: 768px) {
-    .library--publications .empty-state {
+    .library--publications .empty-state,
+    .library--search .empty-state {
         padding: var(--space-16) var(--space-10);
     }
 }
 
-.library--publications .empty-state::before {
+.library--publications .empty-state::before,
+.library--search .empty-state::before {
     width: 64px;
     height: 64px;
     border-radius: var(--radius-2xl);
@@ -3344,7 +3420,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     border-color: var(--color-brand-100);
 }
 
-.library--publications .empty-state h2 {
+.library--publications .empty-state h2,
+.library--search .empty-state h2 {
     margin: 0;
     font-size: clamp(1.25rem, 1.12rem + 0.5vw, 1.5rem);
     font-weight: var(--font-weight-semibold);
@@ -3354,7 +3431,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     text-wrap: balance;
 }
 
-.library--publications .empty-state p {
+.library--publications .empty-state p,
+.library--search .empty-state p {
     margin: 0;
     max-width: 46ch;
     font-size: var(--font-size-md);
@@ -3364,7 +3442,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 }
 
 @media (prefers-color-scheme: dark) {
-    .library--publications .empty-state {
+    .library--publications .empty-state,
+    .library--search .empty-state {
         background-color: var(--color-bg-elevated);
         background-image:
             radial-gradient(80% 60% at 50% 0%, rgb(99 102 241 / 0.12) 0%, transparent 62%);
@@ -3372,7 +3451,8 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
         box-shadow: var(--shadow-xs);
     }
 
-    .library--publications .empty-state::before {
+    .library--publications .empty-state::before,
+    .library--search .empty-state::before {
         background-color: rgb(99 102 241 / 0.14);
         border-color: rgb(99 102 241 / 0.28);
     }
@@ -3385,7 +3465,10 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
 @media (prefers-contrast: more) {
     .library--publications .library-filters,
     .library--publications .empty-state,
-    .library--publications .pagination a {
+    .library--publications .pagination a,
+    .library--search .library-filters,
+    .library--search .empty-state,
+    .library--search .pagination a {
         border-width: 2px;
     }
 }
@@ -3397,11 +3480,19 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     .library--publications .filter-field input,
     .library--publications .filter-field select,
     .library--publications .pagination a,
-    .library--publications .pagination span {
+    .library--publications .pagination span,
+    .library--search .section-eyebrow,
+    .library--search .library-filters,
+    .library--search .empty-state,
+    .library--search .filter-field input,
+    .library--search .filter-field select,
+    .library--search .pagination a,
+    .library--search .pagination span {
         border: 1px solid CanvasText;
     }
 
-    .library--publications .pagination span[aria-current="page"] {
+    .library--publications .pagination span[aria-current="page"],
+    .library--search .pagination span[aria-current="page"] {
         border-width: 2px;
     }
 }

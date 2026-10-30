@@ -76,7 +76,7 @@ export default async function SearchPage({
 
   return (
     <>
-      <section className="library-header">
+      <section className="library-header library-header--search">
         <div className="library-header__inner">
           <p className="section-eyebrow">THƯ VIỆN ẤN PHẨM SỐ</p>
           <h1>{searchTitle}</h1>
@@ -84,8 +84,12 @@ export default async function SearchPage({
         </div>
       </section>
 
-      <section className="library">
+      <section className="library library--search" aria-labelledby="search-results-title">
         <div className="library__inner">
+          <h2 id="search-results-title" className="visually-hidden">
+            Bộ lọc và kết quả tìm kiếm
+          </h2>
+
           <form className="library-filters" method="get" action="/search">
             <div className="filter-field">
               <label htmlFor="search-q">Từ khóa</label>
@@ -96,6 +100,7 @@ export default async function SearchPage({
                 defaultValue={q}
                 placeholder="Tên ấn phẩm, tác giả, nội dung..."
                 autoComplete="off"
+                maxLength={200}
               />
             </div>
 
@@ -133,22 +138,29 @@ export default async function SearchPage({
             </div>
           </form>
 
-          <div className="library-results__summary">
-            <p>
-              <strong>{totalItems.toLocaleString("vi-VN")}</strong> ấn phẩm được tìm thấy.
-            </p>
-          </div>
+          {totalItems > 0 && (
+            <div className="library-results__summary">
+              <p>
+                Tìm thấy <strong>{totalItems.toLocaleString("vi-VN")}</strong> ấn phẩm.
+              </p>
+            </div>
+          )}
 
           {pageItems.length === 0 ? (
             <div className="empty-state">
-              <h2>Không tìm thấy ấn phẩm</h2>
+              <h2>
+                {hasActiveFilter ? "Không tìm thấy ấn phẩm" : "Thư viện chưa có ấn phẩm"}
+              </h2>
               <p>
-                Không có ấn phẩm phù hợp với điều kiện tìm kiếm. Hãy thử từ
-                khóa khác hoặc bỏ bớt bộ lọc.
+                {hasActiveFilter
+                  ? "Không có ấn phẩm phù hợp với điều kiện tìm kiếm. Hãy thử từ khóa khác hoặc bỏ bớt bộ lọc."
+                  : "Hiện chưa có ấn phẩm nào được xuất bản trong thư viện."}
               </p>
-              <Link href="/publications" className="button button--secondary">
-                Xem toàn bộ thư viện
-              </Link>
+              {hasActiveFilter && (
+                <Link href="/search" className="button button--secondary">
+                  Xóa bộ lọc
+                </Link>
+              )}
             </div>
           ) : (
             <>
