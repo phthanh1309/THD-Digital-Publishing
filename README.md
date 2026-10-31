@@ -4,7 +4,7 @@
 
 Nền tảng web để giới thiệu, đọc và quản lý **tập san, kỷ yếu và các ấn phẩm số** của nhà trường.
 
-> **Branch nguồn:** `whisle` — README này là tài liệu handoff, phản ánh đúng code tại thời điểm cập nhật (2026-10-31). Không dựa vào README/branch cũ để kết luận trạng thái.
+> **Branch hiện tại:** `restore-old-ui` — README này là tài liệu handoff, phản ánh đúng code tại thời điểm cập nhật (2026-10-31). Không dựa vào README/branch cũ để kết luận trạng thái.
 
 ---
 
@@ -223,4 +223,4 @@ npm run lint
 npm run build
 ```
 
-Coi `whisle` là source of truth hiện tại. Nếu phát hiện README lệch với code, **code thắng** — cập nhật lại README trong cùng commit với thay đổi.
+Coi branch đang checkout là source of truth hiện tại. Nếu phát hiện README lệch với code, **code thắng** — cập nhật lại README trong cùng commit với thay đổi.
