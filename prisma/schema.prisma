@@ -37,6 +37,8 @@ model Publication {
   favorites Favorite[]
   comments Comment[]
   readingHistory ReadingHistory[]
+  featureOverrides PublicationFeature[]
+  featureAuditLogs FeatureSettingAuditLog[]
 }
 
 enum Role {
@@ -63,6 +65,7 @@ model User {
   favorites Favorite[]
   comments Comment[]
   readingHistory ReadingHistory[]
+  featureAuditLogs FeatureSettingAuditLog[]
 }
 model Account {
   id                String  @id @default(cuid())
@@ -143,4 +146,77 @@ model ReadingHistory {
   publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, publicationId])
+}
+
+enum FeatureScope {
+  GLOBAL
+  GLOBAL_AND_PUBLICATION
+}
+
+enum FeatureOverrideState {
+  INHERIT
+  ENABLED
+  DISABLED
+}
+
+enum FeatureAuditScope {
+  GLOBAL
+  PUBLICATION
+}
+
+enum FeatureAuditAction {
+  SET_GLOBAL
+  SET_OVERRIDE
+  RESET_OVERRIDE
+}
+
+model FeatureFlag {
+  key         String       @id
+  name        String
+  description String       @default("")
+  enabled     Boolean      @default(true)
+  scope       FeatureScope @default(GLOBAL)
+  sortOrder   Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  publicationOverrides PublicationFeature[]
+
+  @@index([scope])
+}
+
+model PublicationFeature {
+  id            String               @id @default(cuid())
+  featureKey    String
+  publicationId String
+  state         FeatureOverrideState @default(INHERIT)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  feature     FeatureFlag @relation(fields: [featureKey], references: [key], onDelete: Cascade, onUpdate: Cascade)
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([featureKey, publicationId])
+  @@index([publicationId])
+  @@index([featureKey, state])
+}
+
+model FeatureSettingAuditLog {
+  id            String               @id @default(cuid())
+  actorId       String?
+  featureKey    String
+  scope         FeatureAuditScope
+  publicationId String?
+  action        FeatureAuditAction
+  oldValue      Json?
+  newValue      Json?
+  createdAt     DateTime             @default(now())
+
+  actor       User?        @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  publication Publication? @relation(fields: [publicationId], references: [id], onDelete: SetNull)
+
+  @@index([featureKey, createdAt])
+  @@index([publicationId, createdAt])
+  @@index([actorId, createdAt])
+  @@index([createdAt])
 }
