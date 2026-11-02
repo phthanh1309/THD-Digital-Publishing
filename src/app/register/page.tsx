@@ -1,64 +1,34 @@
-"use client";
-
-import { useActionState } from "react";
 import Link from "next/link";
-import { registerAction } from "./actions";
+import { isRegistrationEnabled } from "@/lib/features/registration-gate";
+import RegisterForm from "./register-form";
 import "../admin/admin.css";
 
-export default function RegisterPage() {
-  const [message, formAction, pending] = useActionState(registerAction, "");
+// The register feature flag is read from the database, so this page must be
+// rendered per request and never baked into a static build.
+export const dynamic = "force-dynamic";
 
-  if (message === "SUCCESS") {
+export default async function RegisterPage() {
+  const enabled = await isRegistrationEnabled();
+
+  if (!enabled) {
     return (
       <div className="admin-login-page">
         <main className="admin-login">
-          <section className="admin-login-card">
-            <h1>Kiểm tra email của bạn</h1>
-            <p>Mình đã gửi liên kết xác thực. Bấm vào liên kết trong email để kích hoạt tài khoản.</p>
-            <Link href="/login">← Quay lại đăng nhập</Link>
+          <section className="admin-login-card" aria-labelledby="register-closed-title">
+            <header className="admin-login-header">
+              <h1 id="register-closed-title">Đăng ký tạm khóa</h1>
+            </header>
+            <div className="admin-alert admin-alert-error" role="alert">
+              Tính năng đăng ký tài khoản hiện đang tạm khóa. Vui lòng quay lại sau.
+            </div>
+            <footer className="admin-login-footer">
+              <Link href="/login">← Quay lại đăng nhập</Link>
+            </footer>
           </section>
         </main>
       </div>
     );
   }
 
-  return (
-    <div className="admin-login-page">
-      <main className="admin-login">
-        <section className="admin-login-card">
-          <header className="admin-login-header">
-            <h1>Đăng ký tài khoản</h1>
-          </header>
-
-          {message && (
-            <div className="admin-alert admin-alert-error" role="alert">
-              {message}
-            </div>
-          )}
-
-          <form className="admin-login-form" action={formAction}>
-            <div className="form-field">
-              <label htmlFor="username">Tên đăng nhập</label>
-              <input id="username" name="username" type="text" required />
-            </div>
-            <div className="form-field">
-              <label htmlFor="email">Email</label>
-              <input id="email" name="email" type="email" required />
-            </div>
-            <div className="form-field">
-              <label htmlFor="password">Mật khẩu</label>
-              <input id="password" name="password" type="password" required minLength={8} />
-            </div>
-            <button type="submit" className="button button-primary" disabled={pending}>
-              {pending ? "Đang xử lý..." : "Đăng ký"}
-            </button>
-          </form>
-
-          <footer className="admin-login-footer">
-            <Link href="/login">Đã có tài khoản? Đăng nhập</Link>
-          </footer>
-        </section>
-      </main>
-    </div>
-  );
+  return <RegisterForm />;
 }
