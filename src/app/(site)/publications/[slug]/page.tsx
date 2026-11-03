@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/utils";
 import ShareButton from "@/components/ShareButton";
 import { auth } from "@/lib/auth-nextauth";
+import { isPublicationFeatureAvailable } from "@/lib/features/publication-feature-gate";
 import LikeButton from "@/components/LikeButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { toggleFavorite } from "./favorite-actions";
@@ -26,16 +27,19 @@ const p = found;
 recordReadingHistory(p.id).catch(() => {}); // chạy nền, không chờ, không chặn trang nếu lỗi
 
 const session = await auth();
-const [likeCount, userLike] = await Promise.all([
+const [likeCount, likeEnabled] = await Promise.all([
   prisma.like.count({ where: { publicationId: p.id } }),
-  session?.user?.id
-    ? prisma.like.findUnique({
+  isPublicationFeatureAvailable("like", p.id),
+]);
+
+const userLike =
+  likeEnabled && session?.user?.id
+    ? await prisma.like.findUnique({
         where: {
           userId_publicationId: { userId: session.user.id, publicationId: p.id },
         },
       })
-    : null,
-]);
+    : null;
 
 const userFavorite = session?.user?.id
     ? await prisma.favorite.findUnique({
@@ -140,13 +144,23 @@ const comments = await prisma.comment.findMany({
                 Reader chưa khả dụng
               </span>
             )}
-            <LikeButton
-              publicationId={p.id}
-              slug={p.slug}
-              liked={!!userLike}
-              count={likeCount}
-              loggedIn={!!session?.user}
-            />
+            {likeEnabled ? (
+              <LikeButton
+                publicationId={p.id}
+                slug={p.slug}
+                liked={!!userLike}
+                count={likeCount}
+                loggedIn={!!session?.user}
+              />
+            ) : (
+              <span
+                className="publication-like-count"
+                aria-label={`${likeCount} lượt thích`}
+              >
+                <span aria-hidden="true">❤️</span>
+                <span>{likeCount} lượt thích</span>
+              </span>
+            )}
 
             <FavoriteButton
               publicationId={p.id}

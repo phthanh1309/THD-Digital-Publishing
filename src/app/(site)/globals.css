@@ -3646,6 +3646,13 @@ main p a:hover, main li a:hover { text-decoration-color: currentColor; }
     .publication-actions .button { width: 100%; }
 }
 
+/* Flag tắt: chỉ hiển thị số lượt thích, không có nút tương tác. */
+.publication-actions .publication-like-count {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+}
+
 /* --- Nút trong .publication-actions (nền sáng) ---
    Base .button--primary/--secondary được thiết kế cho nền tối (xem ghi chú
    cùng chủ đề ở mục 26): primary = nền trắng, secondary = chữ trắng + nền
