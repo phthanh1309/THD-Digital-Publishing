@@ -48,6 +48,7 @@ export default async function AdminDashboard() {
 
           <nav className="admin-nav" aria-label="Điều hướng quản trị">
             <Link href="/admin" aria-current="page">Dashboard</Link>
+            <Link href="/admin/features">Feature Flags</Link>
             <Link href="/">Xem thư viện</Link>
           </nav>
 
