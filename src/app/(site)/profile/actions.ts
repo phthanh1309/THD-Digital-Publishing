@@ -2,57 +2,57 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth-nextauth";
-import { profileSchema, firstZodError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
+import { profileAccessDependencies } from "@/lib/features/profile-gate";
+import {
+  runProfileUpdate,
+  type ProfileAvatarInput,
+} from "@/lib/profile";
 
 const STORAGE_ROOT = path.join(process.cwd(), "storage");
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+
+function getAvatarInput(formData: FormData): ProfileAvatarInput | null {
+  const file = formData.get("avatarFile");
+  if (!(file instanceof File) || file.size <= 0) return null;
+
+  return {
+    name: file.name,
+    size: file.size,
+    read: () => file.arrayBuffer(),
+  };
+}
 
 export async function updateProfile(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Chưa đăng nhập.");
-
-  const parsed = profileSchema.safeParse({
-    name: String(formData.get("name") ?? ""),
-    bio: String(formData.get("bio") ?? ""),
-  });
-  if (!parsed.success) throw new Error(firstZodError(parsed.error));
-
-  const avatarFile = formData.get("avatarFile") as File | null;
-  let imagePath: string | undefined;
-
-  if (avatarFile && avatarFile.size > 0) {
-    if (avatarFile.size > MAX_AVATAR_SIZE) {
-      throw new Error("Ảnh đại diện tối đa 5MB.");
-    }
-
-    const ext = path.extname(avatarFile.name).toLowerCase();
-    if (![".jpg", ".jpeg", ".png", ".webp"].includes(ext)) {
-      throw new Error("Chỉ chấp nhận ảnh jpg/png/webp.");
-    }
-
-    const dir = path.join(STORAGE_ROOT, "avatars");
-    await mkdir(dir, { recursive: true });
-
-    const filename = `${session.user.id}-${Date.now()}${ext}`;
-    await writeFile(
-      path.join(dir, filename),
-      Buffer.from(await avatarFile.arrayBuffer())
-    );
-
-    imagePath = `avatars/${filename}`;
-  }
-
-  await prisma.user.update({
-    where: { id: session.user.id },
-    data: {
-      name: parsed.data.name || undefined,
-      bio: parsed.data.bio,
-      ...(imagePath ? { image: imagePath } : {}),
+  await runProfileUpdate(
+    {
+      name: String(formData.get("name") ?? ""),
+      bio: String(formData.get("bio") ?? ""),
+      avatar: getAvatarInput(formData),
     },
-  });
+    {
+      access: profileAccessDependencies,
 
-  revalidatePath("/profile");
+      async getSessionUserId() {
+        const session = await auth();
+        return session?.user?.id ?? null;
+      },
+
+      async saveAvatar({ fileName, data }) {
+        const dir = path.join(STORAGE_ROOT, "avatars");
+        await mkdir(dir, { recursive: true });
+        await writeFile(path.join(dir, fileName), data);
+        return `avatars/${fileName}`;
+      },
+
+      async updateUser(id, data) {
+        await prisma.user.update({ where: { id }, data });
+      },
+
+      revalidate() {
+        revalidatePath("/profile");
+      },
+    },
+  );
 }

@@ -1,17 +1,55 @@
-import { redirect } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth-nextauth";
 import { prisma } from "@/lib/prisma";
 import { updateProfile } from "./actions";
+import { profileAccessDependencies } from "@/lib/features/profile-gate";
+import { getProfileView } from "@/lib/profile";
+import "../../admin/admin.css";
+
+export const dynamic = "force-dynamic";
 
 export default async function ProfilePage() {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
+  const view = await getProfileView({
+    access: profileAccessDependencies,
+    async getSessionUserId() {
+      const session = await auth();
+      return session?.user?.id ?? null;
+    },
+    async findUserById(id) {
+      return prisma.user.findUnique({
+        where: { id },
+      });
+    },
   });
-  if (!user) redirect("/login");
+
+  if (view.status === "disabled") {
+    return (
+      <div className="admin-login-page">
+        <main className="admin-login">
+          <section
+            className="admin-login-card"
+            aria-labelledby="profile-closed-title"
+          >
+            <header className="admin-login-header">
+              <h1 id="profile-closed-title">Hồ sơ cá nhân tạm khóa</h1>
+            </header>
+            <div className="admin-alert admin-alert-error" role="alert">
+              Tính năng hồ sơ cá nhân hiện đang tạm khóa. Vui lòng quay lại sau.
+            </div>
+            <footer className="admin-login-footer">
+              <Link href="/">← Quay lại trang chủ</Link>
+            </footer>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (view.status !== "ok") redirect("/login");
+
+  const user = view.user;
 
   const displayName = user.name?.trim() || user.username;
   const initials =
