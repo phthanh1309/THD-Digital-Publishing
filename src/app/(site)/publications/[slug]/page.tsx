@@ -27,11 +27,13 @@ const p = found;
 recordReadingHistory(p.id).catch(() => {}); // chạy nền, không chờ, không chặn trang nếu lỗi
 
 const session = await auth();
-const [likeCount, likeEnabled, commentEnabled] = await Promise.all([
-  prisma.like.count({ where: { publicationId: p.id } }),
-  isPublicationFeatureAvailable("like", p.id),
-  isPublicationFeatureAvailable("comment", p.id),
-]);
+const [likeCount, likeEnabled, commentEnabled, favoriteEnabled] =
+  await Promise.all([
+    prisma.like.count({ where: { publicationId: p.id } }),
+    isPublicationFeatureAvailable("like", p.id),
+    isPublicationFeatureAvailable("comment", p.id),
+    isPublicationFeatureAvailable("favorite", p.id),
+  ]);
 
 const userLike =
   likeEnabled && session?.user?.id
@@ -42,7 +44,8 @@ const userLike =
       })
     : null;
 
-const userFavorite = session?.user?.id
+const userFavorite =
+  favoriteEnabled && session?.user?.id
     ? await prisma.favorite.findUnique({
         where: {
           userId_publicationId: { userId: session.user.id, publicationId: p.id },
@@ -163,13 +166,15 @@ const comments = await prisma.comment.findMany({
               </span>
             )}
 
-            <FavoriteButton
-              publicationId={p.id}
-              slug={p.slug}
-              action={toggleFavorite}
-              initialSaved={!!userFavorite}
-              loggedIn={!!session?.user}
-            />
+            {favoriteEnabled && (
+              <FavoriteButton
+                publicationId={p.id}
+                slug={p.slug}
+                action={toggleFavorite}
+                initialSaved={!!userFavorite}
+                loggedIn={!!session?.user}
+              />
+            )}
 
             {p.allowDownload && p.pdf && (
               <a className="button button--secondary" href={`/api/files/${p.pdf}?download=1`} download>
