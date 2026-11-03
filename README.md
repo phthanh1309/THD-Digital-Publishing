@@ -4,7 +4,7 @@
 
 Nền tảng web để giới thiệu, đọc và quản lý **tập san, kỷ yếu và các ấn phẩm số** của nhà trường.
 
-> **Branch hiện tại:** `restore-old-ui` — README này là tài liệu handoff, phản ánh đúng code tại thời điểm cập nhật (2026-10-31). Không dựa vào README/branch cũ để kết luận trạng thái.
+> **Branch hiện tại:** `seagad` — README này là tài liệu handoff, phản ánh đúng code tại thời điểm cập nhật (2026-11-03). Không dựa vào README/branch cũ để kết luận trạng thái.
 
 ---
 
@@ -19,13 +19,15 @@ Nền tảng web để giới thiệu, đọc và quản lý **tập san, kỷ y
 | Nội dung | Admin CMS, CRUD ấn phẩm, upload cover/PDF, trạng thái `draft` / `published` / `archived`, quyền tải/in/chia sẻ theo từng ấn phẩm, dọn file cũ khi thay thế hoặc xóa |
 | Auth | Auth.js (next-auth v5 beta): Credentials + Google + Facebook, xác minh email qua Resend, một bảng `User` duy nhất, role `USER` / `ADMIN` |
 | Tương tác | Like, Favorite, Comment, Reading History, hồ sơ người dùng (tên / bio / avatar) |
-| Chất lượng | Zod validation cho các luồng chính, phân quyền ADMIN phía server, `lint` + `build` pass |
+| Feature Flags | 6 global flag (`login`, `register`, `profile`, `like`, `comment`, `favorite`), override theo ấn phẩm, Audit Log, Admin UI tại `/admin/features` |
+| Chất lượng | Zod validation cho các luồng chính, phân quyền ADMIN phía server, `npm test` + `lint` + `build` pass |
 | Hạ tầng request | `src/proxy.ts` (Next 16 Proxy, thay cho `middleware.ts`) chặn `/admin/*` |
 
-**Đã verify (2026-10-31):**
+**Đã verify (2026-11-03):**
 
+- `npm test` → PASS, 165 test (feature flags + regression D1.1–D1.6)
 - `npm run lint` → PASS, không lỗi/warning
-- `npm run build` → PASS, 15 route, TypeScript OK, **không còn cảnh báo deprecated `middleware`**
+- `npm run build` → PASS, 14 route, TypeScript OK, **không còn cảnh báo deprecated `middleware`**
 - Smoke test production: `GET /admin` → `307 → /login`
 
 ### Chưa làm / đang chờ
@@ -69,6 +71,7 @@ src/
 │   │   ├── globals.css       # Design tokens + CSS thuần của site
 │   │   └── layout.tsx        # Root layout (html/body, header, footer)
 │   ├── admin/                # Dashboard + publications/new + publications/[id]/edit
+│   │   ├── features/         # Global flags + publication overrides + Audit Log
 │   │   ├── admin.css         # CSS thuần của admin
 │   │   └── layout.tsx
 │   ├── login/ + login/success/
@@ -82,6 +85,8 @@ src/
 ├── data/                     # site.ts, publications.ts (nội dung tĩnh)
 └── lib/                      # prisma, auth-nextauth, auth-adapter,
                               # authorization, validation, resend, utils
+                              # features/: registry, resolver, read service,
+                              # management write workflow, Prisma adapter
 
 prisma/schema.prisma
 scripts/create-admin.ts
@@ -117,15 +122,85 @@ Không được chỉ dựa vào frontend hay proxy để phân quyền.
 
 PostgreSQL + Prisma 6.x. `prisma` và `@prisma/client` phải cùng major — **không tự nâng lên Prisma 7/8**.
 
-**Model:** `User`, `Account`, `Session`, `VerificationToken`, `Publication`, `Like`, `Favorite`, `Comment`, `ReadingHistory`.
+**Model:** `User`, `Account`, `Session`, `VerificationToken`, `Publication`, `Like`, `Favorite`, `Comment`, `ReadingHistory`, `FeatureFlag`, `PublicationFeature`, `FeatureSettingAuditLog`.
 
 - **User**: một bảng duy nhất cho USER + ADMIN, role `USER` / `ADMIN`.
 - **Publication**: status `draft` / `published` / `archived`; draft và archived không hiển thị công khai.
 - **Ràng buộc duy nhất**: Like / Favorite / ReadingHistory theo `userId + publicationId`; Comment gắn user + publication + nội dung.
+- **FeatureFlag**: trạng thái global theo `key`; **PublicationFeature**: override `INHERIT` / `ENABLED` / `DISABLED` theo `[featureKey, publicationId]`; **FeatureSettingAuditLog**: lịch sử thay đổi global/override.
 
 ---
 
-## 6. Storage
+## 6. Feature Management
+
+Hệ thống Feature Flag quyết định một tính năng có được phép chạy hay không. Mọi quyết định được thực hiện **phía server** qua `src/lib/features/resolver.ts` + `service.ts`; client không bao giờ tự quyết định.
+
+### 6.1 Sáu Feature Flag được quản lý
+
+| Key | Tên | Phạm vi |
+|---|---|---|
+| `login` | Đăng nhập | Global |
+| `register` | Đăng ký | Global |
+| `profile` | Hồ sơ cá nhân | Global |
+| `like` | Thích | Global + ấn phẩm |
+| `comment` | Bình luận | Global + ấn phẩm |
+| `favorite` | Lưu ấn phẩm | Global + ấn phẩm |
+
+`history`, `share`, `download`, `print` vẫn tồn tại như permission flags của reader nhưng **không** nằm trong giao diện quản lý 6 flag ở trên.
+
+### 6.2 Global và Publication Override
+
+- **Global ON/OFF** áp dụng cho toàn hệ thống, lưu ở `FeatureFlag.enabled`.
+- **Publication override** chỉ áp dụng cho feature phạm vi `GLOBAL_AND_PUBLICATION`, lưu ở `PublicationFeature.state`:
+  - `INHERIT` — theo Global (không có row cũng tương đương INHERIT).
+  - `ENABLED` — bật cho riêng ấn phẩm khi Global đang ON.
+  - `DISABLED` — tắt riêng ấn phẩm.
+- Feature phạm vi `GLOBAL` (`login`, `register`, `profile`) không nhận override.
+
+### 6.3 Quy tắc ưu tiên
+
+```text
+Global OFF  -> luôn tắt, kể cả override ENABLED
+Global ON + override DISABLED -> tắt riêng ấn phẩm
+Global ON + override ENABLED  -> bật
+Global ON + INHERIT / không có override -> bật
+```
+
+Ngoài ra hệ thống **fail-closed**: thiếu row `FeatureFlag`, lỗi đọc database hoặc ấn phẩm không tồn tại đều bị coi là tắt.
+
+### 6.4 Dùng giao diện quản trị
+
+1. Đăng nhập bằng tài khoản `ADMIN`.
+2. Vào `/admin` → **Feature Flags** (hoặc trực tiếp `/admin/features`).
+3. **Global Feature Flags**: mỗi card hiển thị tên, mô tả, key, phạm vi, trạng thái và nút bật/tắt.
+4. **Override theo ấn phẩm**: tìm theo tiêu đề/tác giả → chọn ấn phẩm → xem Global, override, hiệu lực thực tế → chọn `INHERIT` / `ENABLED` / `DISABLED` → lưu.
+5. **Audit Log gần đây**: 20 thay đổi mới nhất, gồm người thực hiện, hành động, feature, ấn phẩm, giá trị trước/sau và thời gian.
+
+Chỉ `ADMIN` mới truy cập được trang và thực hiện mutation. `requireAdmin()` kiểm tra session + role đọc từ database ở server; role do client gửi bị bỏ qua.
+
+### 6.5 Audit Log
+
+Mọi mutation thành công ghi một row `FeatureSettingAuditLog` trong **cùng transaction** với thay đổi flag/override. Nếu ghi audit thất bại, thay đổi bị rollback. Mutation thất bại không tạo audit success.
+
+- `SET_GLOBAL` — đổi global flag.
+- `SET_OVERRIDE` — đặt override `ENABLED` / `DISABLED`.
+- `RESET_OVERRIDE` — đưa override về `INHERIT`.
+
+### 6.6 Code chính
+
+```text
+src/lib/features/keys.ts                 # registry tĩnh, nguồn sự thật cho key/name/scope
+src/lib/features/resolver.ts             # quy tắc global + override, fail-closed
+src/lib/features/service.ts              # read-only service + React cache theo request
+src/lib/features/management.ts           # validate + write workflow + admin guard
+src/lib/features/management-prisma.ts    # adapter Prisma, transaction mutation + audit
+src/lib/features/admin-data.ts           # audit loader có admin guard
+src/app/admin/features/                  # page, actions, client controls, loading, error
+```
+
+---
+
+## 7. Storage
 
 ```text
 storage/
@@ -141,7 +216,7 @@ storage/
 
 ---
 
-## 7. UI
+## 8. UI
 
 Hiện tại site và admin dùng **CSS thuần** với design tokens (`globals.css`, `admin.css`), Tailwind v4 + shadcn/ui đã được nối sẵn (`src/app/tailwind.css`, `components/ui`) để dùng dần.
 
@@ -155,7 +230,7 @@ Nguyên tắc khi redesign:
 
 ---
 
-## 8. Quy ước bắt buộc
+## 9. Quy ước bắt buộc
 
 1. **Không làm lại tính năng đã xong** (auth, role, like, favorite, comment, reading history). Kiểm tra code hiện tại trước khi sửa.
 2. **Không tạo hệ thống auth thứ hai**, không quay lại custom admin session.
@@ -167,7 +242,7 @@ Nguyên tắc khi redesign:
 
 ---
 
-## 9. Việc tiếp theo (theo thứ tự)
+## 10. Việc tiếp theo (theo thứ tự)
 
 ```text
 1. Rà soát Zod + authorization ở toàn bộ Server Actions/API
@@ -179,11 +254,12 @@ Nguyên tắc khi redesign:
 
 ---
 
-## 10. Lệnh thường dùng
+## 11. Lệnh thường dùng
 
 ```bash
 npm install
 npm run dev
+npm test
 npm run lint
 npm run build
 
@@ -196,7 +272,7 @@ npx tsx scripts/create-admin.ts <username> <password>
 
 ---
 
-## 11. Deploy checklist
+## 12. Deploy checklist
 
 - [ ] `DATABASE_URL` trỏ PostgreSQL production
 - [ ] `AUTH_SECRET` mới, đủ mạnh
@@ -211,7 +287,7 @@ npx tsx scripts/create-admin.ts <username> <password>
 
 ---
 
-## 12. Handoff
+## 13. Handoff
 
 Trước khi bắt đầu task mới:
 
@@ -219,6 +295,7 @@ Trước khi bắt đầu task mới:
 git status
 git branch
 git log --oneline -10
+npm test
 npm run lint
 npm run build
 ```
