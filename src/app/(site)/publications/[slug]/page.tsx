@@ -27,9 +27,10 @@ const p = found;
 recordReadingHistory(p.id).catch(() => {}); // chạy nền, không chờ, không chặn trang nếu lỗi
 
 const session = await auth();
-const [likeCount, likeEnabled] = await Promise.all([
+const [likeCount, likeEnabled, commentEnabled] = await Promise.all([
   prisma.like.count({ where: { publicationId: p.id } }),
   isPublicationFeatureAvailable("like", p.id),
+  isPublicationFeatureAvailable("comment", p.id),
 ]);
 
 const userLike =
@@ -218,6 +219,7 @@ const comments = await prisma.comment.findMany({
         comments={comments}
         currentUserId={session?.user?.id}
         isAdmin={(session?.user as { role?: string } | undefined)?.role === "ADMIN"}
+        commentEnabled={commentEnabled}
       />
     </article>
   );

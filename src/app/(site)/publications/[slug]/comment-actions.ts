@@ -2,55 +2,68 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth-nextauth";
-import { commentSchema, firstZodError } from "@/lib/validation";
 import { revalidatePath } from "next/cache";
+import { publicationFeatureAccessDependencies } from "@/lib/features/publication-feature-gate";
+import { runCreateComment, runDeleteComment } from "@/lib/comment";
+
+async function getSessionUser() {
+  const session = await auth();
+  const user = session?.user as { id?: string; role?: string } | undefined;
+  if (!user?.id) return null;
+
+  return { id: user.id, role: user.role ?? null };
+}
 
 export async function createComment(
   publicationId: string,
   slug: string,
   formData: FormData
 ) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Vui lòng đăng nhập để bình luận.");
-  }
+  await runCreateComment(
+    { publicationId, slug, formData },
+    {
+      access: publicationFeatureAccessDependencies,
 
-  const parsed = commentSchema.safeParse({
-    content: String(formData.get("content") ?? ""),
-  });
-  if (!parsed.success) throw new Error(firstZodError(parsed.error));
+      getSessionUser,
 
-  const publication = await prisma.publication.findFirst({
-    where: { id: publicationId, slug, status: "published" },
-    select: { id: true },
-  });
-  if (!publication) throw new Error("Không tìm thấy ấn phẩm.");
+      async findPublication(id, publicationSlug) {
+        return prisma.publication.findFirst({
+          where: { id, slug: publicationSlug, status: "published" },
+          select: { id: true },
+        });
+      },
 
-  await prisma.comment.create({
-    data: {
-      content: parsed.data.content,
-      userId: session.user.id,
-      publicationId: publication.id,
-    },
-  });
+      async createComment(data) {
+        await prisma.comment.create({ data });
+      },
 
-  revalidatePath(`/publications/${slug}`);
+      revalidate(publicationSlug) {
+        revalidatePath(`/publications/${publicationSlug}`);
+      },
+    }
+  );
 }
 
 export async function deleteComment(commentId: string, slug: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Vui lòng đăng nhập.");
+  await runDeleteComment(
+    { commentId, slug },
+    {
+      getSessionUser,
 
-  const comment = await prisma.comment.findUnique({ where: { id: commentId } });
-  if (!comment) return;
+      async findComment(id) {
+        return prisma.comment.findUnique({
+          where: { id },
+          select: { id: true, userId: true, publicationId: true },
+        });
+      },
 
-  const isOwner = comment.userId === session.user.id;
-  const isAdmin = (session.user as { role?: string }).role === "ADMIN";
+      async deleteComment(id) {
+        await prisma.comment.delete({ where: { id } });
+      },
 
-  if (!isOwner && !isAdmin) {
-    throw new Error("Bạn không có quyền xóa bình luận này.");
-  }
-
-  await prisma.comment.delete({ where: { id: commentId } });
-  revalidatePath(`/publications/${slug}`);
+      revalidate(publicationSlug) {
+        revalidatePath(`/publications/${publicationSlug}`);
+      },
+    }
+  );
 }

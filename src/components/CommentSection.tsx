@@ -17,12 +17,14 @@ export default function CommentSection({
   comments,
   currentUserId,
   isAdmin,
+  commentEnabled,
 }: {
   publicationId: string;
   slug: string;
   comments: CommentItem[];
   currentUserId?: string;
   isAdmin: boolean;
+  commentEnabled: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -74,40 +76,42 @@ export default function CommentSection({
         </p>
       ) : null}
 
-      {currentUserId ? (
-        <form ref={formRef} action={handleSubmit} className="publication-comment-form">
-          <label htmlFor="comment-content" className="publication-comment-form__label">
-            Viết bình luận
-          </label>
-          <textarea
-            id="comment-content"
-            name="content"
-            className="publication-comment-form__input"
-            rows={3}
-            maxLength={1000}
-            placeholder="Chia sẻ cảm nhận của bạn về ấn phẩm..."
-            required
-            aria-describedby="comment-hint"
-          />
-          <div className="publication-comment-form__actions">
-            <p id="comment-hint" className="publication-comment-form__hint">
-              Tối đa 1000 ký tự.
-            </p>
-            <button
-              type="submit"
-              className="button button--primary"
-              disabled={isPending}
-              aria-busy={isPending}
-            >
-              {isPending ? "Đang gửi…" : "Gửi bình luận"}
-            </button>
-          </div>
-        </form>
-      ) : (
-        <p className="publication-comments__signin">
-          <a href="/login">Đăng nhập</a> để bình luận.
-        </p>
-      )}
+      {commentEnabled ? (
+        currentUserId ? (
+          <form ref={formRef} action={handleSubmit} className="publication-comment-form">
+            <label htmlFor="comment-content" className="publication-comment-form__label">
+              Viết bình luận
+            </label>
+            <textarea
+              id="comment-content"
+              name="content"
+              className="publication-comment-form__input"
+              rows={3}
+              maxLength={1000}
+              placeholder="Chia sẻ cảm nhận của bạn về ấn phẩm..."
+              required
+              aria-describedby="comment-hint"
+            />
+            <div className="publication-comment-form__actions">
+              <p id="comment-hint" className="publication-comment-form__hint">
+                Tối đa 1000 ký tự.
+              </p>
+              <button
+                type="submit"
+                className="button button--primary"
+                disabled={isPending}
+                aria-busy={isPending}
+              >
+                {isPending ? "Đang gửi…" : "Gửi bình luận"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="publication-comments__signin">
+            <a href="/login">Đăng nhập</a> để bình luận.
+          </p>
+        )
+      ) : null}
 
       {comments.length === 0 ? (
         <p className="publication-comments__empty">
